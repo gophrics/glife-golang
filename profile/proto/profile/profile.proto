@@ -2,9 +2,15 @@
 syntax = "proto3";
 
 package profile; 
+import "google/api/annotations.proto";
 
 service ProfileService {
-  rpc GetUser(User) returns (Response) {}
+  rpc GetUser(User) returns (Response) {
+    option (google.api.http) = {
+      post: "/v1/getuser"
+      body: "*"
+    };
+  }
 }
 
 message User {
