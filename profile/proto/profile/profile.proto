@@ -9,24 +9,23 @@ service ProfileService {
       get: "/v1/getuser"
     };
   }
+
+  rpc RegisterUser(User) returns (Response) {
+    option (google.api.http) = {
+      post: "/v1/register",
+      body: "*"
+    };
+  } 
 }
 
 message User {
-  string id = 1;
-  string description = 2;
-  int32 weight = 3;
-  repeated Container containers = 4;
-  string vessel_id = 5;
-}
-
-message Container {
-  string id = 1;
-  string customer_id = 2;
-  string origin = 3;
-  string user_id = 4;
+  string id       = 1;
+  string name     = 2;
+  string phone    = 3;
+  string country  = 4;
 }
 
 message Response {
-  bool created = 1;
-  User user = 2;
+  bool OperationSuccess = 1;
+  User User = 2;
 }

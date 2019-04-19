@@ -1,3 +1,6 @@
+run:
+	go run main.go
+
 build:
 	protoc -I/usr/local/include -I. \
 	-I/Users/nitinissacjoy/go/src \

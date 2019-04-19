@@ -2,7 +2,7 @@
 
 
 build:
-	(cd profile; make build)
+	(cd profile; make build;)
 
 run:
 	make build

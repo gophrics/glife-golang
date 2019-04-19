@@ -1,4 +1,4 @@
-package profile
+package main
 
 import (
 	"context"
@@ -22,16 +22,25 @@ type service struct {
 func (s *service) GetUser(ctx context.Context, req *pb.User) (*pb.Response, error) {
 
 	response := &pb.Response{
-		Created: true,
+		OperationSuccess: true,
 		User: req,
 	}
 
 	return response,nil
 }
 
+func (s *service) RegisterUser(ctx context.Context, req *pb.User) (*pb.Response, error) {
+
+	response := &pb.Response{
+		OperationSuccess: true,
+		User: req,
+	}
+
+	return response, nil
+}
 
 // 
-func Main() {
+func main() {
 
 	// Set-up our gRPC server.
 	lis, err := net.Listen("tcp", port)
