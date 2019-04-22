@@ -1,3 +1,7 @@
-make run &
+make run > output
 cd profile
-make run
+make run > output
+cd ..
+cd location/
+make run > output
+ls

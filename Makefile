@@ -3,6 +3,7 @@
 
 build:
 	(cd profile; make build;)
+	(cd location; make build;)
 
 run:
 	make build

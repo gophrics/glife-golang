@@ -6,22 +6,22 @@ import (
 	"net"
 
 	// Import the generated protobuf code
-	pb "./proto"
+	lc "./proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 const (
-	port = ":50051"
+	port = ":50052"
 )
 
 type service struct {
 }
 
-func (s *service) GetUser(ctx context.Context, req *pb.User) (*pb.Response, error) {
+func (s *service) GetUser(ctx context.Context, req *lc.User) (*lc.Response, error) {
 
-	response := &pb.Response{
+	response := &lc.Response{
 		OperationSuccess: true,
 		User: req,
 	}
@@ -29,9 +29,9 @@ func (s *service) GetUser(ctx context.Context, req *pb.User) (*pb.Response, erro
 	return response,nil
 }
 
-func (s *service) RegisterUser(ctx context.Context, req *pb.User) (*pb.Response, error) {
+func (s *service) RegisterUser(ctx context.Context, req *lc.User) (*lc.Response, error) {
 
-	response := &pb.Response{
+	response := &lc.Response{
 		OperationSuccess: true,
 		User: req,
 	}
@@ -52,7 +52,7 @@ func main() {
 	// Register our service with the gRPC server, this will tie our
 	// implementation into the auto-generated interface code for our
 	// protobuf definition.
-	pb.RegisterProfileServiceServer(s, &service{})
+	location.RegisterProfileServiceServer(s, &service{})
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s)

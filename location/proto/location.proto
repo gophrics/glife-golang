@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package location; 
+import "google/api/annotations.proto";
+
+service ProfileService {
+  rpc GetUser(User) returns (Response) {
+    option (google.api.http) = {
+      get: "/v1/getuser"
+    };
+  }
+
+  rpc RegisterUser(User) returns (Response) {
+    option (google.api.http) = {
+      post: "/v1/register",
+      body: "*"
+    };
+  } 
+}
+
+message User {
+  string id       = 1;
+  string name     = 2;
+  string phone    = 3;
+  string country  = 4;
+}
+
+message Response {
+  bool OperationSuccess = 1;
+  User User = 2;
+}
