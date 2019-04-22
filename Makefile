@@ -7,4 +7,6 @@ build:
 
 run:
 	make build
+	(cd profile; $(MAKE) run) &
+	(cd location; $(MAKE) run) &
 	go run main.go

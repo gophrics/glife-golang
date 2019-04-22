@@ -7,10 +7,12 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	gw "./profile/proto"
+	lc "./location/proto"
 )
 
 var (
 	profileEndpoint = flag.String("profile", "localhost:50051", "endpoint of profile service")
+	locationEndpoint = flag.String("location", "localhost:50052", "endpoint of location service")
 )
 
 
@@ -24,6 +26,11 @@ func run() error {
 	err := gw.RegisterProfileServiceHandlerFromEndpoint(ctx, mux, *profileEndpoint, opts);
 	if err != nil {
 	  return err
+	}
+
+	err = lc.RegisterProfileServiceHandlerFromEndpoint(ctx, mux, *locationEndpoint, opts);
+	if err != nil {
+		return err
 	}
 	 
 	return http.ListenAndServe(":8080", mux);

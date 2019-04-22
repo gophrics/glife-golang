@@ -52,7 +52,7 @@ func main() {
 	// Register our service with the gRPC server, this will tie our
 	// implementation into the auto-generated interface code for our
 	// protobuf definition.
-	location.RegisterProfileServiceServer(s, &service{})
+	lc.RegisterProfileServiceServer(s, &service{})
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
