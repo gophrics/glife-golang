@@ -32,16 +32,16 @@ func (s *service) GetUser(ctx context.Context, req *pb.User) (*pb.Response, erro
 
 func (s *service) RegisterUser(ctx context.Context, req *pb.User) (*pb.Response, error) {
 
-	insert, err := dbserver.Instance.Query(fmt.Sprintf("INSERT INTO User VALUES (%s,%s,%s,%s)", req.Id, req.Name, req.Phone, req.Country))
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	defer insert.Close()
+	prep, _ := dbserver.Instance.Prepare("INSERT INTO User VALUES (?,?,?,?)")
+	prep.Exec(req.Id, req.Name, req.Phone, req.Country)
 
 	var user *pb.User
-	err = dbserver.Instance.QueryRow("SELECT * from Users").Scan(&user.Id, &user.Name, &user.Phone, &user.Country)
+	rows, _ := dbserver.Instance.Query("SELECT * from Users where id='?'", 1)
+
+	if rows.Next() {
+		rows.Scan(&user.Id, &user.Name, &user.Country, &user.Phone)
+		fmt.Printf("%s %s %s %s", user.Id, user.Name, user.Country, user.Phone)
+	}
 
 	response := &pb.Response{
 		OperationSuccess: true,

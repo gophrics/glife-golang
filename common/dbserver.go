@@ -6,7 +6,7 @@ import _ "github.com/go-sql-driver/mysql"
 func openDB() *sql.DB {
 	url := "mysql"
 	username := "root"
-	password := "pass"
+	password := ""
 	dbname := "glife"
 	db, err := sql.Open(url, username+":"+password+"@/"+dbname)
 
