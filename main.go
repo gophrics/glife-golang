@@ -6,7 +6,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	gw "./profile/proto"
+	pf "./profile/proto"
 	lc "./location/proto"
 )
 
@@ -23,7 +23,7 @@ func run() error {
 	 
 	mux := runtime.NewServeMux();
 	opts := []grpc.DialOption{grpc.WithInsecure()};
-	err := gw.RegisterProfileServiceHandlerFromEndpoint(ctx, mux, *profileEndpoint, opts);
+	err := pf.RegisterProfileServiceHandlerFromEndpoint(ctx, mux, *profileEndpoint, opts);
 	if err != nil {
 	  return err
 	}

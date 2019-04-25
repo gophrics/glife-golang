@@ -19,10 +19,10 @@ service ProfileService {
 }
 
 message User {
-  string id       = 1;
-  string name     = 2;
-  string phone    = 3;
-  string country  = 4;
+  string Id       = 1;
+  string Name     = 2;
+  string Phone    = 3;
+  string Country  = 4;
 }
 
 message Response {

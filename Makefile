@@ -9,4 +9,5 @@ run:
 	make build
 	(cd profile; $(MAKE) run) &
 	(cd location; $(MAKE) run) &
+	(cd common; $(MAKE) run) &
 	go run main.go
