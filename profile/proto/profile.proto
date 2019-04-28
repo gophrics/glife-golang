@@ -4,9 +4,10 @@ package profile;
 import "google/api/annotations.proto";
 
 service ProfileService {
-  rpc GetUser(User) returns (Response) {
+  rpc GetUser(UserRequest) returns (Response) {
     option (google.api.http) = {
-      get: "/v1/getuser"
+      post: "/v1/getuser",
+      body: "*"
     };
   }
 
@@ -23,6 +24,10 @@ message User {
   string Name     = 2;
   string Phone    = 3;
   string Country  = 4;
+}
+
+message UserRequest {
+  string Id = 1;
 }
 
 message Response {

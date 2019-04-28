@@ -1,28 +1,25 @@
 package dbserver
 
-import "database/sql"
-import _ "github.com/go-sql-driver/mysql"
+import (
+	"database/sql"
+	"fmt"
+
+	_ "github.com/go-sql-driver/mysql"
+)
+
+// Instance : Singleton Instance
+var Instance *sql.DB
 
 func openDB() *sql.DB {
 	url := "mysql"
 	username := "root"
 	password := ""
 	dbname := "glife"
-	db, err := sql.Open(url, username+":"+password+"@/"+dbname)
-
-	if err != nil {
-		panic(err.Error())
-	}
-	return db
-}
-
-func close() {
-	Instance.Close()
+	Instance, _ = sql.Open(url, username+":"+password+"@/"+dbname)
+	fmt.Printf("DB OPened\n")
+	return Instance
 }
 
 func init() {
 	openDB()
 }
-
-// Instance : Singleton Instance
-var Instance = openDB()

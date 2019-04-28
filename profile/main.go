@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 
@@ -20,11 +19,23 @@ const (
 type service struct {
 }
 
-func (s *service) GetUser(ctx context.Context, req *pb.User) (*pb.Response, error) {
+func (s *service) GetUser(ctx context.Context, req *pb.UserRequest) (*pb.Response, error) {
 
+	// If struct not initialzed, inner variables don't exist
+	var user *pb.User = &pb.User{}
+
+	rows, err := dbserver.Instance.Query("SELECT * from User") //.Scan(&user.Id, &user.Name, &user.Country, &user.Phone)
+
+	if err != nil {
+		panic(err)
+	}
+
+	for rows.Next() {
+		rows.Scan(&user.Id, &user.Name, &user.Country, &user.Phone)
+	}
 	response := &pb.Response{
 		OperationSuccess: true,
-		User:             req,
+		User:             user,
 	}
 
 	return response, nil
@@ -36,12 +47,12 @@ func (s *service) RegisterUser(ctx context.Context, req *pb.User) (*pb.Response,
 	prep.Exec(req.Id, req.Name, req.Phone, req.Country)
 
 	var user *pb.User
-	rows, _ := dbserver.Instance.Query("SELECT * from Users where id='?'", 1)
+	dbserver.Instance.Query("SELECT * from User")
 
-	if rows.Next() {
-		rows.Scan(&user.Id, &user.Name, &user.Country, &user.Phone)
-		fmt.Printf("%s %s %s %s", user.Id, user.Name, user.Country, user.Phone)
-	}
+	// if rows.Next() {
+	// 	rows.Scan(&user.Id, &user.Name, &user.Country, &user.Phone)
+	// 	fmt.Printf("%s %s %s %s", user.Id, user.Name, user.Country, user.Phone)
+	// }
 
 	response := &pb.Response{
 		OperationSuccess: true,
