@@ -24,7 +24,7 @@ func (s *service) GetUser(ctx context.Context, req *pb.UserRequest) (*pb.Respons
 	// If struct not initialzed, inner variables don't exist
 	var user *pb.User = &pb.User{}
 
-	rows, err := dbserver.Instance.Query("SELECT * from User") //.Scan(&user.Id, &user.Name, &user.Country, &user.Phone)
+	rows, err := dbserver.Instance.Query("SELECT * from User where Id=?", req.Id) //.Scan(&user.Id, &user.Name, &user.Country, &user.Phone)
 
 	if err != nil {
 		panic(err)
