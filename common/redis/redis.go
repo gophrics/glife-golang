@@ -8,6 +8,9 @@ var Instance *redis.Client
 // GeoLocation : redis.GeoLocation
 type GeoLocation = redis.GeoLocation
 
+// GeoRadiusQuery : redis.GeoRadiusQuery
+type GeoRadiusQuery = redis.GeoRadiusQuery
+
 func init() {
 	Instance = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",

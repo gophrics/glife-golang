@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net"
-	"strconv"
 
 	// Import the generated protobuf code
 	lc "./proto"
@@ -21,16 +20,19 @@ const (
 type service struct {
 }
 
+/*
+	TODO: Add Validations
+*/
 func (s *service) UpdateMyLocation(ctx context.Context, req *lc.Location) (*lc.Response, error) {
 
-	latitude, _ := strconv.ParseFloat(req.Latitude, 64)
-	longitude, _ := strconv.ParseFloat(req.Longitude, 64)
+	latitude := req.Latitude
+	longitude := req.Longitude
 	var profileId string = req.ProfileId
 
-	_, err := redis.Instance.GeoAdd(profileId, &redis.GeoLocation{
+	_, err := redis.Instance.GeoAdd("LastKnown", &redis.GeoLocation{
 		Latitude:  latitude,
 		Longitude: longitude,
-		Name:      "LastKnown",
+		Name:      profileId,
 	}).Result()
 
 	response := &lc.Response{
@@ -42,7 +44,37 @@ func (s *service) UpdateMyLocation(ctx context.Context, req *lc.Location) (*lc.R
 
 func (s *service) NearMe(ctx context.Context, req *lc.Location) (*lc.NearMeResponse, error) {
 
-	return nil, nil
+	latitude := req.Latitude
+	longitude := req.Longitude
+	profileId := req.ProfileId
+
+	res, err := redis.Instance.GeoRadius(profileId, latitude, longitude, &redis.GeoRadiusQuery{
+		// Update Radius! WTF
+		Radius:    10000,
+		WithCoord: true,
+	}).Result()
+
+	var profileArray []*lc.Location
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	for _, element := range res {
+		profile := &lc.Location{
+			ProfileId: element.Name,
+			Latitude:  element.Latitude,
+			Longitude: element.Longitude,
+		}
+
+		profileArray = append(profileArray, profile)
+	}
+
+	response := &lc.NearMeResponse{
+		ProfileArray: profileArray,
+	}
+
+	return response, nil
 }
 
 func main() {

@@ -23,12 +23,12 @@ service LocationService {
 
 message Location {
   string profileId  = 1;
-  string latitude   = 2;
-  string longitude  = 3;
+  double latitude   = 2;
+  double longitude  = 3;
 }
 
 message NearMeResponse {
-  repeated string profileArray = 1; 
+  repeated Location profileArray = 1; 
 }
 
 message Response {
