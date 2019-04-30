@@ -28,25 +28,8 @@ var _ status.Status
 var _ = runtime.String
 var _ = utilities.NewDoubleArray
 
-var (
-	filter_ProfileService_GetUser_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
-func request_ProfileService_GetUser_0(ctx context.Context, marshaler runtime.Marshaler, client ProfileServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq User
-	var metadata runtime.ServerMetadata
-
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_ProfileService_GetUser_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := client.GetUser(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func request_ProfileService_RegisterUser_0(ctx context.Context, marshaler runtime.Marshaler, client ProfileServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq User
+func request_LocationService_NearMe_0(ctx context.Context, marshaler runtime.Marshaler, client LocationServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq Location
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -57,14 +40,31 @@ func request_ProfileService_RegisterUser_0(ctx context.Context, marshaler runtim
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.RegisterUser(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.NearMe(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-// RegisterProfileServiceHandlerFromEndpoint is same as RegisterProfileServiceHandler but
+func request_LocationService_UpdateMyLocation_0(ctx context.Context, marshaler runtime.Marshaler, client LocationServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq Location
+	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.UpdateMyLocation(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+// RegisterLocationServiceHandlerFromEndpoint is same as RegisterLocationServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterProfileServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterLocationServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -84,23 +84,23 @@ func RegisterProfileServiceHandlerFromEndpoint(ctx context.Context, mux *runtime
 		}()
 	}()
 
-	return RegisterProfileServiceHandler(ctx, mux, conn)
+	return RegisterLocationServiceHandler(ctx, mux, conn)
 }
 
-// RegisterProfileServiceHandler registers the http handlers for service ProfileService to "mux".
+// RegisterLocationServiceHandler registers the http handlers for service LocationService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterProfileServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterProfileServiceHandlerClient(ctx, mux, NewProfileServiceClient(conn))
+func RegisterLocationServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterLocationServiceHandlerClient(ctx, mux, NewLocationServiceClient(conn))
 }
 
-// RegisterProfileServiceHandlerClient registers the http handlers for service ProfileService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "ProfileServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "ProfileServiceClient"
+// RegisterLocationServiceHandlerClient registers the http handlers for service LocationService
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "LocationServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "LocationServiceClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "ProfileServiceClient" to call the correct interceptors.
-func RegisterProfileServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client ProfileServiceClient) error {
+// "LocationServiceClient" to call the correct interceptors.
+func RegisterLocationServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client LocationServiceClient) error {
 
-	mux.Handle("GET", pattern_ProfileService_GetUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_LocationService_NearMe_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -109,18 +109,18 @@ func RegisterProfileServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ProfileService_GetUser_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_LocationService_NearMe_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_ProfileService_GetUser_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_LocationService_NearMe_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_ProfileService_RegisterUser_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_LocationService_UpdateMyLocation_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -129,14 +129,14 @@ func RegisterProfileServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_ProfileService_RegisterUser_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_LocationService_UpdateMyLocation_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_ProfileService_RegisterUser_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_LocationService_UpdateMyLocation_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -144,13 +144,13 @@ func RegisterProfileServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_ProfileService_GetUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "getlocation"}, ""))
+	pattern_LocationService_NearMe_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"location", "v1", "nearme"}, ""))
 
-	pattern_ProfileService_RegisterUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "register"}, ""))
+	pattern_LocationService_UpdateMyLocation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"location", "v1", "update"}, ""))
 )
 
 var (
-	forward_ProfileService_GetUser_0 = runtime.ForwardResponseMessage
+	forward_LocationService_NearMe_0 = runtime.ForwardResponseMessage
 
-	forward_ProfileService_RegisterUser_0 = runtime.ForwardResponseMessage
+	forward_LocationService_UpdateMyLocation_0 = runtime.ForwardResponseMessage
 )

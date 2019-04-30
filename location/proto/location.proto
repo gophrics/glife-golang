@@ -7,14 +7,14 @@ service LocationService {
   
   rpc NearMe(Location) returns (NearMeResponse) {
     option (google.api.http) = {
-      post: "/v1/register",
+      post: "/location/v1/nearme",
       body: "*"
     };
   }
 
   rpc UpdateMyLocation(Location) returns (Response) {
     option (google.api.http) = {
-      post: "location/v1/update",
+      post: "/location/v1/update",
       body: "*"
     };
   }
@@ -22,22 +22,15 @@ service LocationService {
 }
 
 message Location {
-  string latitude = 1;
-  string longitude = 2;
+  string profileId  = 1;
+  string latitude   = 2;
+  string longitude  = 3;
 }
 
 message NearMeResponse {
   repeated string profileArray = 1; 
 }
 
-message User {
-  string id       = 1;
-  string name     = 2;
-  string phone    = 3;
-  string country  = 4;
-}
-
 message Response {
   bool OperationSuccess = 1;
-  User User = 2;
 }

@@ -25,72 +25,102 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type User struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Phone                string   `protobuf:"bytes,3,opt,name=phone,proto3" json:"phone,omitempty"`
-	Country              string   `protobuf:"bytes,4,opt,name=country,proto3" json:"country,omitempty"`
+type Location struct {
+	ProfileId            string   `protobuf:"bytes,1,opt,name=profileId,proto3" json:"profileId,omitempty"`
+	Latitude             string   `protobuf:"bytes,2,opt,name=latitude,proto3" json:"latitude,omitempty"`
+	Longitude            string   `protobuf:"bytes,3,opt,name=longitude,proto3" json:"longitude,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *User) Reset()         { *m = User{} }
-func (m *User) String() string { return proto.CompactTextString(m) }
-func (*User) ProtoMessage()    {}
-func (*User) Descriptor() ([]byte, []int) {
+func (m *Location) Reset()         { *m = Location{} }
+func (m *Location) String() string { return proto.CompactTextString(m) }
+func (*Location) ProtoMessage()    {}
+func (*Location) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1d9f8c6d814f264b, []int{0}
 }
 
-func (m *User) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_User.Unmarshal(m, b)
+func (m *Location) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Location.Unmarshal(m, b)
 }
-func (m *User) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_User.Marshal(b, m, deterministic)
+func (m *Location) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Location.Marshal(b, m, deterministic)
 }
-func (m *User) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_User.Merge(m, src)
+func (m *Location) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Location.Merge(m, src)
 }
-func (m *User) XXX_Size() int {
-	return xxx_messageInfo_User.Size(m)
+func (m *Location) XXX_Size() int {
+	return xxx_messageInfo_Location.Size(m)
 }
-func (m *User) XXX_DiscardUnknown() {
-	xxx_messageInfo_User.DiscardUnknown(m)
+func (m *Location) XXX_DiscardUnknown() {
+	xxx_messageInfo_Location.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_User proto.InternalMessageInfo
+var xxx_messageInfo_Location proto.InternalMessageInfo
 
-func (m *User) GetId() string {
+func (m *Location) GetProfileId() string {
 	if m != nil {
-		return m.Id
+		return m.ProfileId
 	}
 	return ""
 }
 
-func (m *User) GetName() string {
+func (m *Location) GetLatitude() string {
 	if m != nil {
-		return m.Name
+		return m.Latitude
 	}
 	return ""
 }
 
-func (m *User) GetPhone() string {
+func (m *Location) GetLongitude() string {
 	if m != nil {
-		return m.Phone
+		return m.Longitude
 	}
 	return ""
 }
 
-func (m *User) GetCountry() string {
+type NearMeResponse struct {
+	ProfileArray         []string `protobuf:"bytes,1,rep,name=profileArray,proto3" json:"profileArray,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *NearMeResponse) Reset()         { *m = NearMeResponse{} }
+func (m *NearMeResponse) String() string { return proto.CompactTextString(m) }
+func (*NearMeResponse) ProtoMessage()    {}
+func (*NearMeResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1d9f8c6d814f264b, []int{1}
+}
+
+func (m *NearMeResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_NearMeResponse.Unmarshal(m, b)
+}
+func (m *NearMeResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_NearMeResponse.Marshal(b, m, deterministic)
+}
+func (m *NearMeResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_NearMeResponse.Merge(m, src)
+}
+func (m *NearMeResponse) XXX_Size() int {
+	return xxx_messageInfo_NearMeResponse.Size(m)
+}
+func (m *NearMeResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_NearMeResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_NearMeResponse proto.InternalMessageInfo
+
+func (m *NearMeResponse) GetProfileArray() []string {
 	if m != nil {
-		return m.Country
+		return m.ProfileArray
 	}
-	return ""
+	return nil
 }
 
 type Response struct {
 	OperationSuccess     bool     `protobuf:"varint,1,opt,name=OperationSuccess,proto3" json:"OperationSuccess,omitempty"`
-	User                 *User    `protobuf:"bytes,2,opt,name=User,proto3" json:"User,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -100,7 +130,7 @@ func (m *Response) Reset()         { *m = Response{} }
 func (m *Response) String() string { return proto.CompactTextString(m) }
 func (*Response) ProtoMessage()    {}
 func (*Response) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1d9f8c6d814f264b, []int{1}
+	return fileDescriptor_1d9f8c6d814f264b, []int{2}
 }
 
 func (m *Response) XXX_Unmarshal(b []byte) error {
@@ -128,39 +158,34 @@ func (m *Response) GetOperationSuccess() bool {
 	return false
 }
 
-func (m *Response) GetUser() *User {
-	if m != nil {
-		return m.User
-	}
-	return nil
-}
-
 func init() {
-	proto.RegisterType((*User)(nil), "location.User")
+	proto.RegisterType((*Location)(nil), "location.Location")
+	proto.RegisterType((*NearMeResponse)(nil), "location.NearMeResponse")
 	proto.RegisterType((*Response)(nil), "location.Response")
 }
 
 func init() { proto.RegisterFile("proto/location.proto", fileDescriptor_1d9f8c6d814f264b) }
 
 var fileDescriptor_1d9f8c6d814f264b = []byte{
-	// 272 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x90, 0xb1, 0x4e, 0xc3, 0x40,
-	0x0c, 0x86, 0x95, 0x10, 0x68, 0x30, 0x55, 0x00, 0xab, 0x12, 0x51, 0xc5, 0x80, 0x32, 0xa1, 0x0e,
-	0x8d, 0x28, 0x1b, 0x0f, 0x00, 0x03, 0x03, 0x28, 0x15, 0x4b, 0xb7, 0x70, 0x35, 0xe1, 0xa4, 0x70,
-	0x3e, 0xdd, 0x5d, 0x2b, 0xb1, 0xf2, 0x0a, 0x3c, 0x03, 0x4f, 0xc4, 0x2b, 0xf0, 0x20, 0xa8, 0x0e,
-	0x01, 0x21, 0x26, 0xb6, 0x7c, 0x5f, 0x6c, 0xff, 0xf6, 0xc1, 0xc8, 0x3a, 0x0e, 0x5c, 0xb6, 0xac,
-	0xea, 0xa0, 0xd9, 0x4c, 0x05, 0x31, 0xed, 0x79, 0x7c, 0xdc, 0x30, 0x37, 0x2d, 0x95, 0xb5, 0xd5,
-	0x65, 0x6d, 0x0c, 0x07, 0xd1, 0xbe, 0xab, 0x2b, 0x16, 0x90, 0xdc, 0x79, 0x72, 0x98, 0x41, 0xac,
-	0x97, 0x79, 0x74, 0x12, 0x9d, 0xee, 0x56, 0xb1, 0x5e, 0x22, 0x42, 0x62, 0xea, 0x27, 0xca, 0x63,
-	0x31, 0xf2, 0x8d, 0x23, 0xd8, 0xb6, 0x8f, 0x6c, 0x28, 0xdf, 0x12, 0xd9, 0x01, 0xe6, 0x30, 0x50,
-	0xbc, 0x32, 0xc1, 0x3d, 0xe7, 0x89, 0xf8, 0x1e, 0x8b, 0x05, 0xa4, 0x15, 0x79, 0xcb, 0xc6, 0x13,
-	0x4e, 0xe0, 0xe0, 0xc6, 0x92, 0x93, 0xec, 0xf9, 0x4a, 0x29, 0xf2, 0x5e, 0xd2, 0xd2, 0xea, 0x8f,
-	0xc7, 0xa2, 0xdb, 0x49, 0xb2, 0xf7, 0x66, 0xd9, 0xf4, 0xfb, 0xb4, 0x8d, 0xad, 0xe4, 0xdf, 0xec,
-	0x2d, 0x82, 0xec, 0xd6, 0xf1, 0x83, 0x6e, 0x69, 0x4e, 0x6e, 0xad, 0x15, 0xe1, 0x25, 0x0c, 0xae,
-	0x28, 0x74, 0xd7, 0xfc, 0xee, 0x19, 0xe3, 0x0f, 0xf7, 0x1b, 0x15, 0x47, 0x2f, 0xef, 0x1f, 0xaf,
-	0xf1, 0x21, 0xee, 0x97, 0xeb, 0xb3, 0xb2, 0xa1, 0xd0, 0x57, 0xe0, 0x35, 0x0c, 0x2b, 0x6a, 0xb4,
-	0x0f, 0xe4, 0xfe, 0x3b, 0xac, 0x18, 0x6e, 0x86, 0xb9, 0xaf, 0xee, 0x8b, 0x68, 0x72, 0xbf, 0x23,
-	0xcf, 0x7c, 0xfe, 0x19, 0x00, 0x00, 0xff, 0xff, 0x45, 0xfe, 0x47, 0x4a, 0xa6, 0x01, 0x00, 0x00,
+	// 288 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x91, 0xcf, 0x4a, 0xc3, 0x40,
+	0x10, 0xc6, 0xd9, 0x16, 0x4a, 0x3a, 0x88, 0x96, 0xd5, 0x43, 0x08, 0x45, 0xca, 0x9e, 0x4a, 0x0e,
+	0x0d, 0xfe, 0xc1, 0x43, 0x6f, 0x1e, 0x05, 0xab, 0x90, 0xa2, 0x07, 0x6f, 0xdb, 0x64, 0x0c, 0x81,
+	0xb8, 0xb3, 0x6c, 0x36, 0x85, 0x5e, 0x7d, 0x05, 0x9f, 0xc9, 0x27, 0xf0, 0x15, 0x7c, 0x10, 0x71,
+	0xd3, 0x6c, 0x2d, 0x0a, 0x1e, 0xe7, 0x37, 0xdf, 0x7c, 0xf9, 0xf2, 0x2d, 0x9c, 0x68, 0x43, 0x96,
+	0x92, 0x8a, 0x32, 0x69, 0x4b, 0x52, 0x33, 0x37, 0xf2, 0xa0, 0x9b, 0xa3, 0x71, 0x41, 0x54, 0x54,
+	0x98, 0x48, 0x5d, 0x26, 0x52, 0x29, 0xb2, 0x0e, 0xd7, 0xad, 0x4e, 0xac, 0x20, 0xb8, 0xdd, 0x2a,
+	0xf9, 0x18, 0x86, 0xda, 0xd0, 0x73, 0x59, 0xe1, 0x4d, 0x1e, 0xb2, 0x09, 0x9b, 0x0e, 0xd3, 0x1d,
+	0xe0, 0x11, 0x04, 0x95, 0xb4, 0xa5, 0x6d, 0x72, 0x0c, 0x7b, 0x6e, 0xe9, 0xe7, 0xef, 0xcb, 0x8a,
+	0x54, 0xd1, 0x2e, 0xfb, 0xed, 0xa5, 0x07, 0xe2, 0x12, 0x0e, 0xef, 0x50, 0x9a, 0x05, 0xa6, 0x58,
+	0x6b, 0x52, 0x35, 0x72, 0x01, 0x07, 0x5b, 0xe3, 0x6b, 0x63, 0xe4, 0x26, 0x64, 0x93, 0xfe, 0x74,
+	0x98, 0xee, 0x31, 0x71, 0x05, 0x81, 0xd7, 0xc7, 0x30, 0xba, 0xd7, 0x68, 0x5c, 0xcc, 0x65, 0x93,
+	0x65, 0x58, 0xd7, 0x2e, 0x60, 0x90, 0xfe, 0xe2, 0xe7, 0xef, 0x0c, 0x8e, 0xba, 0x5f, 0x5a, 0xa2,
+	0x59, 0x97, 0x19, 0xf2, 0x47, 0x18, 0xb4, 0x09, 0x38, 0x9f, 0xf9, 0xa2, 0x3a, 0x51, 0x14, 0xee,
+	0xd8, 0x7e, 0x4e, 0x71, 0xfa, 0xfa, 0xf1, 0xf9, 0xd6, 0x0b, 0xc5, 0xb1, 0xaf, 0x37, 0x59, 0x9f,
+	0x25, 0x0a, 0xa5, 0x79, 0xc1, 0x39, 0x8b, 0xf9, 0x13, 0x8c, 0x1e, 0x74, 0x2e, 0x2d, 0x2e, 0x36,
+	0xbe, 0xc5, 0xbf, 0xbe, 0xf0, 0x83, 0xfd, 0xe3, 0xdd, 0x38, 0xbb, 0x39, 0x8b, 0x57, 0x03, 0xf7,
+	0x40, 0x17, 0x5f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x0a, 0xa3, 0x3f, 0xf2, 0xe0, 0x01, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -171,108 +196,108 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// ProfileServiceClient is the client API for ProfileService service.
+// LocationServiceClient is the client API for LocationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type ProfileServiceClient interface {
-	GetUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Response, error)
-	RegisterUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Response, error)
+type LocationServiceClient interface {
+	NearMe(ctx context.Context, in *Location, opts ...grpc.CallOption) (*NearMeResponse, error)
+	UpdateMyLocation(ctx context.Context, in *Location, opts ...grpc.CallOption) (*Response, error)
 }
 
-type profileServiceClient struct {
+type locationServiceClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewProfileServiceClient(cc *grpc.ClientConn) ProfileServiceClient {
-	return &profileServiceClient{cc}
+func NewLocationServiceClient(cc *grpc.ClientConn) LocationServiceClient {
+	return &locationServiceClient{cc}
 }
 
-func (c *profileServiceClient) GetUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, "/location.ProfileService/GetUser", in, out, opts...)
+func (c *locationServiceClient) NearMe(ctx context.Context, in *Location, opts ...grpc.CallOption) (*NearMeResponse, error) {
+	out := new(NearMeResponse)
+	err := c.cc.Invoke(ctx, "/location.LocationService/NearMe", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *profileServiceClient) RegisterUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Response, error) {
+func (c *locationServiceClient) UpdateMyLocation(ctx context.Context, in *Location, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/location.ProfileService/RegisterUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/location.LocationService/UpdateMyLocation", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ProfileServiceServer is the server API for ProfileService service.
-type ProfileServiceServer interface {
-	GetUser(context.Context, *User) (*Response, error)
-	RegisterUser(context.Context, *User) (*Response, error)
+// LocationServiceServer is the server API for LocationService service.
+type LocationServiceServer interface {
+	NearMe(context.Context, *Location) (*NearMeResponse, error)
+	UpdateMyLocation(context.Context, *Location) (*Response, error)
 }
 
-// UnimplementedProfileServiceServer can be embedded to have forward compatible implementations.
-type UnimplementedProfileServiceServer struct {
+// UnimplementedLocationServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedLocationServiceServer struct {
 }
 
-func (*UnimplementedProfileServiceServer) GetUser(ctx context.Context, req *User) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+func (*UnimplementedLocationServiceServer) NearMe(ctx context.Context, req *Location) (*NearMeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NearMe not implemented")
 }
-func (*UnimplementedProfileServiceServer) RegisterUser(ctx context.Context, req *User) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterUser not implemented")
-}
-
-func RegisterProfileServiceServer(s *grpc.Server, srv ProfileServiceServer) {
-	s.RegisterService(&_ProfileService_serviceDesc, srv)
+func (*UnimplementedLocationServiceServer) UpdateMyLocation(ctx context.Context, req *Location) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateMyLocation not implemented")
 }
 
-func _ProfileService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(User)
+func RegisterLocationServiceServer(s *grpc.Server, srv LocationServiceServer) {
+	s.RegisterService(&_LocationService_serviceDesc, srv)
+}
+
+func _LocationService_NearMe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Location)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProfileServiceServer).GetUser(ctx, in)
+		return srv.(LocationServiceServer).NearMe(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/location.ProfileService/GetUser",
+		FullMethod: "/location.LocationService/NearMe",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProfileServiceServer).GetUser(ctx, req.(*User))
+		return srv.(LocationServiceServer).NearMe(ctx, req.(*Location))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProfileService_RegisterUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(User)
+func _LocationService_UpdateMyLocation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Location)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProfileServiceServer).RegisterUser(ctx, in)
+		return srv.(LocationServiceServer).UpdateMyLocation(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/location.ProfileService/RegisterUser",
+		FullMethod: "/location.LocationService/UpdateMyLocation",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProfileServiceServer).RegisterUser(ctx, req.(*User))
+		return srv.(LocationServiceServer).UpdateMyLocation(ctx, req.(*Location))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _ProfileService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "location.ProfileService",
-	HandlerType: (*ProfileServiceServer)(nil),
+var _LocationService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "location.LocationService",
+	HandlerType: (*LocationServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetUser",
-			Handler:    _ProfileService_GetUser_Handler,
+			MethodName: "NearMe",
+			Handler:    _LocationService_NearMe_Handler,
 		},
 		{
-			MethodName: "RegisterUser",
-			Handler:    _ProfileService_RegisterUser_Handler,
+			MethodName: "UpdateMyLocation",
+			Handler:    _LocationService_UpdateMyLocation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

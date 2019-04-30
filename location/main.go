@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
+	"strconv"
 
 	// Import the generated protobuf code
 	lc "./proto"
@@ -20,36 +21,28 @@ const (
 type service struct {
 }
 
-func (s *service) GetUser(ctx context.Context, req *lc.User) (*lc.Response, error) {
+func (s *service) UpdateMyLocation(ctx context.Context, req *lc.Location) (*lc.Response, error) {
+
+	latitude, _ := strconv.ParseFloat(req.Latitude, 64)
+	longitude, _ := strconv.ParseFloat(req.Longitude, 64)
+	var profileId string = req.ProfileId
+
+	_, err := redis.Instance.GeoAdd(profileId, &redis.GeoLocation{
+		Latitude:  latitude,
+		Longitude: longitude,
+		Name:      "LastKnown",
+	}).Result()
 
 	response := &lc.Response{
-		OperationSuccess: true,
-		User:             req,
+		OperationSuccess: err == nil,
 	}
 
 	return response, nil
 }
 
-func (s *service) RegisterUser(ctx context.Context, req *lc.User) (*lc.Response, error) {
+func (s *service) NearMe(ctx context.Context, req *lc.Location) (*lc.NearMeResponse, error) {
 
-	response := &lc.Response{
-		OperationSuccess: true,
-		User:             req,
-	}
-
-	return response, nil
-}
-
-func (s *service) NearMe(ctx context.Context, req *lc.User) (*lc.Response, error) {
-
-	response := &lc.Response{
-		OperationSuccess: true,
-		User:             req,
-	}
-
-	redis.Instance.Get("Abc")
-
-	return response, nil
+	return nil, nil
 }
 
 func main() {
@@ -64,7 +57,7 @@ func main() {
 	// Register our service with the gRPC server, this will tie our
 	// implementation into the auto-generated interface code for our
 	// protobuf definition.
-	lc.RegisterProfileServiceServer(s, &service{})
+	lc.RegisterLocationServiceServer(s, &service{})
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
