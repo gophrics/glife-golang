@@ -6,7 +6,7 @@ import (
 	"net"
 
 	// Import the generated protobuf code
-	dbserver "../common"
+	mysql "../common/mysql"
 	pb "./proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -24,7 +24,7 @@ func (s *service) GetUser(ctx context.Context, req *pb.UserRequest) (*pb.Respons
 	// If struct not initialzed, inner variables don't exist
 	var user *pb.User = &pb.User{}
 
-	rows, err := dbserver.Instance.Query("SELECT * from User where Id=?", req.Id) //.Scan(&user.Id, &user.Name, &user.Country, &user.Phone)
+	rows, err := mysql.Instance.Query("SELECT * from User where Id=?", req.Id)
 
 	if err != nil {
 		panic(err)
@@ -43,20 +43,12 @@ func (s *service) GetUser(ctx context.Context, req *pb.UserRequest) (*pb.Respons
 
 func (s *service) RegisterUser(ctx context.Context, req *pb.User) (*pb.Response, error) {
 
-	prep, _ := dbserver.Instance.Prepare("INSERT INTO User VALUES (?,?,?,?)")
+	prep, _ := mysql.Instance.Prepare("INSERT INTO User VALUES (?,?,?,?)")
 	prep.Exec(req.Id, req.Name, req.Phone, req.Country)
-
-	var user *pb.User
-	dbserver.Instance.Query("SELECT * from User")
-
-	// if rows.Next() {
-	// 	rows.Scan(&user.Id, &user.Name, &user.Country, &user.Phone)
-	// 	fmt.Printf("%s %s %s %s", user.Id, user.Name, user.Country, user.Phone)
-	// }
 
 	response := &pb.Response{
 		OperationSuccess: true,
-		User:             user,
+		User:             req,
 	}
 
 	return response, nil

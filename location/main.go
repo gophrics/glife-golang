@@ -8,6 +8,7 @@ import (
 	// Import the generated protobuf code
 	lc "./proto"
 
+	redis "../common/redis"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -23,23 +24,34 @@ func (s *service) GetUser(ctx context.Context, req *lc.User) (*lc.Response, erro
 
 	response := &lc.Response{
 		OperationSuccess: true,
-		User: req,
+		User:             req,
 	}
 
-	return response,nil
+	return response, nil
 }
 
 func (s *service) RegisterUser(ctx context.Context, req *lc.User) (*lc.Response, error) {
 
 	response := &lc.Response{
 		OperationSuccess: true,
-		User: req,
+		User:             req,
 	}
 
 	return response, nil
 }
 
-// 
+func (s *service) NearMe(ctx context.Context, req *lc.User) (*lc.Response, error) {
+
+	response := &lc.Response{
+		OperationSuccess: true,
+		User:             req,
+	}
+
+	redis.Instance.Get("Abc")
+
+	return response, nil
+}
+
 func main() {
 
 	// Set-up our gRPC server.

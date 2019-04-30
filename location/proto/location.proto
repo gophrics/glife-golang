@@ -3,19 +3,31 @@ syntax = "proto3";
 package location; 
 import "google/api/annotations.proto";
 
-service ProfileService {
-  rpc GetUser(User) returns (Response) {
-    option (google.api.http) = {
-      get: "/v1/getlocation"
-    };
-  }
-
-  rpc RegisterUser(User) returns (Response) {
+service LocationService {
+  
+  rpc NearMe(Location) returns (NearMeResponse) {
     option (google.api.http) = {
       post: "/v1/register",
       body: "*"
     };
-  } 
+  }
+
+  rpc UpdateMyLocation(Location) returns (Response) {
+    option (google.api.http) = {
+      post: "location/v1/update",
+      body: "*"
+    };
+  }
+  
+}
+
+message Location {
+  string latitude = 1;
+  string longitude = 2;
+}
+
+message NearMeResponse {
+  repeated string profileArray = 1; 
 }
 
 message User {
