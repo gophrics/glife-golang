@@ -4,10 +4,6 @@
 build:
 	(cd profile; make build;)
 	(cd location; make build;)
-
+	go build -o build/main main.go
 run:
-	make build
-	(cd profile; $(MAKE) run) &
-	(cd location; $(MAKE) run) &
-	(cd common; $(MAKE) run) &
-	go run main.go
+	./build/profile & ./build/location & ./build/main

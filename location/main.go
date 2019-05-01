@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 
@@ -44,11 +45,14 @@ func (s *service) UpdateMyLocation(ctx context.Context, req *lc.Location) (*lc.R
 
 func (s *service) NearMe(ctx context.Context, req *lc.Location) (*lc.NearMeResponse, error) {
 
+	fmt.Printf("API HIT\n")
 	latitude := req.Latitude
 	longitude := req.Longitude
 	profileId := req.ProfileId
 
-	res, err := redis.Instance.GeoRadius(profileId, latitude, longitude, &redis.GeoRadiusQuery{
+	fmt.Printf(profileId)
+
+	res, err := redis.Instance.GeoRadius("LastKnown", latitude, longitude, &redis.GeoRadiusQuery{
 		// Update Radius! WTF
 		Radius:    10000,
 		WithCoord: true,
@@ -61,6 +65,7 @@ func (s *service) NearMe(ctx context.Context, req *lc.Location) (*lc.NearMeRespo
 	}
 
 	for _, element := range res {
+		fmt.Printf(element.Name)
 		profile := &lc.Location{
 			ProfileId: element.Name,
 			Latitude:  element.Latitude,
