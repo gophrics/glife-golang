@@ -28,7 +28,7 @@ var _ status.Status
 var _ = runtime.String
 var _ = utilities.NewDoubleArray
 
-func request_LocationService_NearMe_0(ctx context.Context, marshaler runtime.Marshaler, client LocationServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_LocationService_NearMe_0(ctx context.Context, marshaler runtime.Marshaler, client LocationServiceClient, req *http.Request, pathParams map[string]string) (LocationService_NearMeClient, runtime.ServerMetadata, error) {
 	var protoReq Location
 	var metadata runtime.ServerMetadata
 
@@ -40,8 +40,16 @@ func request_LocationService_NearMe_0(ctx context.Context, marshaler runtime.Mar
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.NearMe(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
+	stream, err := client.NearMe(ctx, &protoReq)
+	if err != nil {
+		return nil, metadata, err
+	}
+	header, err := stream.Header()
+	if err != nil {
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+	return stream, metadata, nil
 
 }
 
@@ -116,7 +124,7 @@ func RegisterLocationServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 			return
 		}
 
-		forward_LocationService_NearMe_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_LocationService_NearMe_0(ctx, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -150,7 +158,7 @@ var (
 )
 
 var (
-	forward_LocationService_NearMe_0 = runtime.ForwardResponseMessage
+	forward_LocationService_NearMe_0 = runtime.ForwardResponseStream
 
 	forward_LocationService_UpdateMyLocation_0 = runtime.ForwardResponseMessage
 )

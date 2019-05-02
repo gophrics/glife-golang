@@ -5,7 +5,7 @@ import "google/api/annotations.proto";
 
 service LocationService {
   
-  rpc NearMe(Location) returns (NearMeResponse) {
+  rpc NearMe(Location) returns (stream Location) {
     option (google.api.http) = {
       post: "/location/v1/nearme",
       body: "*"

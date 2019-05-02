@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	// Import the generated protobuf code
 	lc "./proto"
@@ -31,8 +32,8 @@ type service struct {
 func (s *service) UpdateMyLocation(ctx context.Context, req *lc.Location) (*lc.Response, error) {
 
 	latitude := req.Latitude
+	profileId := req.ProfileId
 	longitude := req.Longitude
-	var profileId string = req.ProfileId
 
 	_, err := redis.Instance.GeoAdd("LastKnown", &redis.GeoLocation{
 		Latitude:  latitude,
@@ -50,7 +51,9 @@ func (s *service) UpdateMyLocation(ctx context.Context, req *lc.Location) (*lc.R
 /*
 	gRPC API
 */
-func (s *service) NearMe(ctx context.Context, req *lc.Location) (*lc.NearMeResponse, error) {
+func (s *service) NearMe(req *lc.Location, stream lc.LocationService_NearMeServer) error {
+
+	fmt.Printf("NearMe HIT")
 	latitude := req.Latitude
 	longitude := req.Longitude
 
@@ -72,15 +75,17 @@ func (s *service) NearMe(ctx context.Context, req *lc.Location) (*lc.NearMeRespo
 			Latitude:  element.Latitude,
 			Longitude: element.Longitude,
 		}
-
+		stream.Send(profile)
+		time.Sleep(time.Second)
 		profileArray = append(profileArray, profile)
 	}
 
-	response := &lc.NearMeResponse{
-		ProfileArray: profileArray,
-	}
-
-	return response, nil
+	/*
+		response := &lc.NearMeResponse{
+			ProfileArray: profileArray,
+		}
+	*/
+	return nil
 }
 
 // define a reader which will listen for
