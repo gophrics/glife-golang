@@ -33,6 +33,7 @@ func run() error {
 		return err
 	}
 
+	http.HandleFunc("/location/v1/NearMeWs", location.)
 	return http.ListenAndServe(":8080", mux)
 }
 
