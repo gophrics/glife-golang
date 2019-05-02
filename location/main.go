@@ -18,13 +18,14 @@ import (
 
 const (
 	port   = ":50052" // gRPC
-	wsport = ":8082"  // Websocket
+	wsport = ":60061" // Websocket
 )
 
 type service struct {
 }
 
 /*
+	gRPC API
 	TODO: Add Validations
 */
 func (s *service) UpdateMyLocation(ctx context.Context, req *lc.Location) (*lc.Response, error) {
@@ -46,6 +47,9 @@ func (s *service) UpdateMyLocation(ctx context.Context, req *lc.Location) (*lc.R
 	return response, nil
 }
 
+/*
+	gRPC API
+*/
 func (s *service) NearMe(ctx context.Context, req *lc.Location) (*lc.NearMeResponse, error) {
 	latitude := req.Latitude
 	longitude := req.Longitude
@@ -79,11 +83,6 @@ func (s *service) NearMe(ctx context.Context, req *lc.Location) (*lc.NearMeRespo
 	return response, nil
 }
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
 // define a reader which will listen for
 // new messages being sent to our WebSocket
 // endpoint
@@ -106,6 +105,9 @@ func reader(conn *websocket.Conn) {
 	}
 }
 
+/*
+	Websocket API
+*/
 func NearMeWS(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Attempting connection to websocket")
 
@@ -147,6 +149,7 @@ func main() {
 
 	http.HandleFunc("/location/v1/nearmews", NearMeWS)
 	http.ListenAndServe(wsport, nil)
+
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
