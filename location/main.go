@@ -1,102 +1,24 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
-	"net"
+	"net/http"
 
-	// Import the generated protobuf code
-	lc "./proto"
+	location "./Service"
 
-	redis "../common/redis"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	"github.com/go-chi/chi"
 )
-
-const (
-	port = ":50052" // gRPC
-)
-
-type service struct {
-}
-
-/*
-	gRPC API
-	TODO: Add Validations
-*/
-func (s *service) UpdateMyLocation(ctx context.Context, req *lc.Location) (*lc.Response, error) {
-
-	latitude := req.Latitude
-	profileId := req.ProfileId
-	longitude := req.Longitude
-
-	_, err := redis.Instance.GeoAdd("LastKnown", &redis.GeoLocation{
-		Latitude:  latitude,
-		Longitude: longitude,
-		Name:      profileId,
-	}).Result()
-
-	response := &lc.Response{
-		OperationSuccess: err == nil,
-	}
-
-	return response, nil
-}
-
-/*
-	gRPC API
-*/
-func (s *service) NearMe(req *lc.Location, stream lc.LocationService_NearMeServer) error {
-
-	fmt.Printf("NearMe HIT")
-	latitude := req.Latitude
-	longitude := req.Longitude
-
-	res, err := redis.Instance.GeoRadius("LastKnown", latitude, longitude, &redis.GeoRadiusQuery{
-		// Update Radius! WTF
-		Radius:    10000,
-		WithCoord: true,
-	}).Result()
-
-	var profileArray []*lc.Location
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	for _, element := range res {
-		profile := &lc.Location{
-			ProfileId: element.Name,
-			Latitude:  element.Latitude,
-			Longitude: element.Longitude,
-		}
-		stream.Send(profile)
-		profileArray = append(profileArray, profile)
-	}
-
-	return nil
-}
 
 func main() {
+	router := location.Routes()
 
-	// Set-up our gRPC server.
-	lis, err := net.Listen("tcp", port)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+		log.Printf("%s %s\n", method, route) // Walk and print out all routes
+		return nil
 	}
-	s := grpc.NewServer()
-
-	// Register our service with the gRPC server, this will tie our
-	// implementation into the auto-generated interface code for our
-	// protobuf definition.
-	lc.RegisterLocationServiceServer(s, &service{})
-
-	// Register reflection service on gRPC server.
-	reflection.Register(s)
-
-	log.Println("Running on port:", port)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	if err := chi.Walk(router, walkFunc); err != nil {
+		log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
 	}
+
+	log.Fatal(http.ListenAndServe(":8081", router)) // Note, the port is usually gotten from the environment.
 }
