@@ -1,79 +1,24 @@
 package main
 
 import (
-	"context"
 	"log"
-	"net"
+	"net/http"
 
-	// Import the generated protobuf code
-	mysql "../common/mysql"
-	pb "./proto"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	profile "./Service"
+
+	"github.com/go-chi/chi"
 )
 
-const (
-	port = ":50051"
-)
-
-type service struct {
-}
-
-func (s *service) GetUser(ctx context.Context, req *pb.UserRequest) (*pb.Response, error) {
-
-	// If struct not initialzed, inner variables don't exist
-	var user *pb.User = &pb.User{}
-
-	rows, err := mysql.Instance.Query("SELECT * from User where Id=?", req.Id)
-
-	if err != nil {
-		panic(err)
-	}
-
-	for rows.Next() {
-		rows.Scan(&user.Id, &user.Name, &user.Country, &user.Phone)
-	}
-	response := &pb.Response{
-		OperationSuccess: true,
-		User:             user,
-	}
-
-	return response, nil
-}
-
-func (s *service) RegisterUser(ctx context.Context, req *pb.User) (*pb.Response, error) {
-
-	prep, _ := mysql.Instance.Prepare("INSERT INTO User VALUES (?,?,?,?)")
-	prep.Exec(req.Id, req.Name, req.Phone, req.Country)
-
-	response := &pb.Response{
-		OperationSuccess: true,
-		User:             req,
-	}
-
-	return response, nil
-}
-
-//
 func main() {
+	router := profile.Routes()
 
-	// Set-up our gRPC server.
-	lis, err := net.Listen("tcp", port)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+		log.Printf("%s %s\n", method, route) // Walk and print out all routes
+		return nil
 	}
-	s := grpc.NewServer()
-
-	// Register our service with the gRPC server, this will tie our
-	// implementation into the auto-generated interface code for our
-	// protobuf definition.
-	pb.RegisterProfileServiceServer(s, &service{})
-
-	// Register reflection service on gRPC server.
-	reflection.Register(s)
-
-	log.Println("Running on port:", port)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	if err := chi.Walk(router, walkFunc); err != nil {
+		log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
 	}
+
+	log.Fatal(http.ListenAndServe(":8080", router)) // Note, the port is usually gotten from the environment.
 }
