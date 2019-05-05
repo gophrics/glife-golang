@@ -1,7 +1,7 @@
 package location
 
 type Location struct {
-	profileId string  `json:"profileId"`
-	latitude  float64 `json:"latitude"`
-	longitude float64 `json:"longitude"`
+	ProfileId string  `json:"profileId"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 }

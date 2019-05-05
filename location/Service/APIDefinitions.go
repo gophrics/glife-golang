@@ -33,9 +33,9 @@ func UpdateLocation(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(b, &req)
 
 	res, err := redis.Instance.GeoAdd("LastKnown", &redis.GeoLocation{
-		Latitude:  req.latitude,
-		Longitude: req.longitude,
-		Name:      req.profileId,
+		Latitude:  req.Latitude,
+		Longitude: req.Longitude,
+		Name:      req.ProfileId,
 	}).Result()
 
 	if err != nil {
@@ -74,12 +74,12 @@ func NearMe(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		msgType, msg, err := conn.ReadMessage()
+
 		if err != nil { // Close connection
 			return
 		}
 		json.Unmarshal(msg, &req)
-
-		res, err := redis.Instance.GeoRadius("LastKnown", req.latitude, req.longitude, &redis.GeoRadiusQuery{
+		res, err := redis.Instance.GeoRadius("LastKnown", req.Latitude, req.Longitude, &redis.GeoRadiusQuery{
 			// Update Radius! WTF
 			Radius:    10000,
 			WithCoord: true,
@@ -87,14 +87,15 @@ func NearMe(w http.ResponseWriter, r *http.Request) {
 
 		for _, element := range res {
 			profile := &Location{
-				profileId: element.Name,
-				latitude:  element.Latitude,
-				longitude: element.Longitude,
+				ProfileId: element.Name,
+				Latitude:  element.Latitude,
+				Longitude: element.Longitude,
 			}
 			i, err := json.Marshal(profile)
 			if err != nil {
 				return
 			}
+
 			if err = conn.WriteMessage(msgType, i); err != nil {
 				return
 			}
