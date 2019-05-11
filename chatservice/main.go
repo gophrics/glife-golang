@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	chat "./Service"
 	"github.com/go-chi/chi"
 )
 
