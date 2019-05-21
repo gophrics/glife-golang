@@ -18,8 +18,14 @@ type ImageData struct {
 	Timestamp int64  `json:"timestamp"`
 }
 
-type TravelResponse struct {
+type TravelData struct {
 	Region       Region           `json:"region"`
 	ImageData    []ImageData      `json:"imageData"`
 	TimelineData map[int][]string `json:"timelinedata"`
+}
+
+type SaveTravelInfoType struct {
+	ProfileId  int64        `json:"profileId"`
+	TravelId   int64        `json:"travelId"`
+	TravelInfo []TravelData `json:"travelInfo"`
 }

@@ -29,7 +29,7 @@ func GetTravelInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req TravelInfo
-	var result []TravelResponse
+	var result []TravelData
 
 	json.Unmarshal(b, &req)
 	filter := bson.D{{"id", req.TravelId}}
@@ -44,4 +44,28 @@ func GetTravelInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, result)
+}
+
+func SaveTravelInfo(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	var req SaveTravelInfoType
+	json.Unmarshal(b, &req)
+
+	filter := bson.D{{"id", req.TravelId}}
+	var profileIdString = fmt.Sprintf("%s", req.ProfileId)
+
+	var collection = mongodb.Instance.Database("travel").Collection(profileIdString)
+
+	collection.UpdateOne(context.TODO(), filter, req.TravelInfo)
+
+	response := make(map[string]string)
+	response["OperationStatus"] = "Success"
+	render.JSON(w, r, response)
 }
