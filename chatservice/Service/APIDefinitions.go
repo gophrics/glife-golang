@@ -67,13 +67,11 @@ func ChatWebsocketAPI(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		for {
 			msgType, msg, err := conn.ReadMessage()
-			fmt.Printf("goroutine got the message")
 			if err != nil { // Close connection
 				return
 			}
 			json.Unmarshal(msg, &messageReq)
 
-			fmt.Printf("goroutine working %s", messageReq)
 			sqlQuery := fmt.Sprintf("SELECT * from %s where Timestamp > '%s'", messageReq.ChatroomID, lastUpdateTimestamp)
 			rows, err := mysql.Instance.Query(sqlQuery)
 
@@ -105,7 +103,6 @@ func ChatWebsocketAPI(w http.ResponseWriter, r *http.Request) {
 	for {
 
 		msgType, msg, err := conn.ReadMessage()
-		fmt.Printf("for got the message")
 		if err != nil { // Close connection
 			return
 		}
