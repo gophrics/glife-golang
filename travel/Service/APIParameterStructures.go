@@ -5,6 +5,16 @@ type TravelInfo struct {
 	TravelId  int64 `json:"travelId"`
 }
 
+type LatLong struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+type LocationFromCoordinateResponse struct {
+	DisplayName string                 `json:"display_name"`
+	Address     map[string]interface{} `json:"address"`
+}
+
 type Region struct {
 	Latitude       float64 `json:"latitude"`
 	Longitude      float64 `json:"longitude"`
