@@ -16,8 +16,8 @@ import (
 
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
-	router.Get("/api/v1/travel/searchlocation", GetLocationFromCoordinates)
-	router.Get("/api/v1/travel/searchcoordinates", GetCoordinatesFromLocation)
+	router.Post("/api/v1/travel/searchcoordinates", GetLocationFromCoordinates)
+	router.Post("/api/v1/travel/searchlocation", GetCoordinatesFromLocation)
 	router.Post("/api/v1/travel/getinfo", GetTravelInfo)
 	return router
 }
@@ -41,13 +41,18 @@ func GetLocationFromCoordinates(w http.ResponseWriter, r *http.Request) {
 	// Truncing down to two digits
 	var latlon = fmt.Sprintf("%.2f%.2f", req.Latitude, req.Longitude)
 
-	fmt.Println(latlon)
-
 	res, err := redis.Instance.Get(latlon).Result()
+
+	var resultJSON struct {
+		DisplayName string                 `json:"display_name"`
+		Address     map[string]interface{} `json:"address"`
+		Error       string                 `json:"error"`
+	}
 
 	if err == nil {
 		fmt.Printf("Serving from location cache\n")
-		render.JSON(w, r, res)
+		json.Unmarshal([]byte(res), &resultJSON)
+		render.JSON(w, r, resultJSON)
 		return
 	}
 
@@ -59,19 +64,15 @@ func GetLocationFromCoordinates(w http.ResponseWriter, r *http.Request) {
 	defer res2.Body.Close()
 
 	body, err := ioutil.ReadAll(res2.Body)
-
-	var resultJSON struct {
-		DisplayName string                 `json:"display_name"`
-		Address     map[string]interface{} `json:"address"`
-	}
-
 	json.Unmarshal([]byte(body), &resultJSON)
+	fmt.Printf("%s", resultJSON)
 
 	fmt.Printf("Serving from locationiq server\n")
 
-	redis.Instance.Set(latlon, resultJSON.DisplayName, 99999999999)
-
-	render.JSON(w, r, resultJSON.DisplayName)
+	if resultJSON.Error == "" {
+		redis.Instance.Set(latlon, fmt.Sprintf("%s", body), 99999999999)
+	}
+	render.JSON(w, r, resultJSON)
 }
 
 func GetCoordinatesFromLocation(w http.ResponseWriter, r *http.Request) {
@@ -87,13 +88,20 @@ func GetCoordinatesFromLocation(w http.ResponseWriter, r *http.Request) {
 		Location string `json:"location"`
 	}
 
+	var resultJSON []struct {
+		Latitude    string `json:"lat"`
+		Longitude   string `json:"lon"`
+		DisplayName string `json:"display_name"`
+	}
+
 	json.Unmarshal(b, &req)
 
 	res, err := redis.Instance.Get(req.Location).Result()
 
 	if err == nil {
 		fmt.Printf("Serving from location cache\n")
-		render.JSON(w, r, res)
+		json.Unmarshal([]byte(res), &resultJSON)
+		render.JSON(w, r, resultJSON)
 		return
 	}
 
@@ -106,14 +114,6 @@ func GetCoordinatesFromLocation(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(res2.Body)
 
-	//fmt.Printf("%s", body)
-
-	var resultJSON []struct {
-		Latitude    string `json:"lat"`
-		Longitude   string `json:"lon"`
-		DisplayName string `json:"display_name"`
-	}
-
 	json.Unmarshal([]byte(body), &resultJSON)
 
 	fmt.Printf("Serving from locationiq server\n")
@@ -124,8 +124,8 @@ func GetCoordinatesFromLocation(w http.ResponseWriter, r *http.Request) {
 		slice = append(slice, res)
 	}
 
-	redis.Instance.Set(req.Location, fmt.Sprintf("%s", slice), 99999999999)
-	render.JSON(w, r, fmt.Sprintf("%s", slice))
+	redis.Instance.Set(req.Location, fmt.Sprintf("%s", body), 99999999999)
+	render.JSON(w, r, resultJSON)
 }
 
 func GetTravelInfo(w http.ResponseWriter, r *http.Request) {
