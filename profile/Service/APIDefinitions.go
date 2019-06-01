@@ -19,13 +19,13 @@ import (
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Post("/api/v1/profile/register", RegisterUser)
-	router.Post("/api/v1/profile/search", FindUser)
+	router.Get("/api/v1/profile/search/{searchstring}", FindUser)
 	router.Get("/api/v1/profile/getuser/{profileId}", GetUser)
 	return router
 }
 
-func NewProfileId() string {
-	return "1"
+func NewProfileId() primitive.ObjectID {
+	return primitive.NewObjectID()
 }
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +84,9 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func FindUser(w http.ResponseWriter, r *http.Request) {
-	ss := fmt.Sprintf(".*%s.*", "Nitin")
+
+	ss := fmt.Sprintf("%s", chi.URLParam(r, "searchstring"))
+	ss = fmt.Sprintf(".*%s.*", ss)
 
 	filter := bson.D{
 		{"$or", bson.A{
@@ -94,7 +96,7 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 		}}}
 	findOptions := options.Find()
 
-	var result GetUserResponse
+	var result []GetUserResponse
 
 	cur, err := mongodb.Profile.Find(context.TODO(), filter, findOptions)
 
@@ -102,15 +104,17 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
+	var x GetUserResponse
 	for cur.Next(context.TODO()) {
-		err := cur.Decode(&result)
+		err := cur.Decode(&x)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Printf("%s", result)
+		fmt.Printf("%s", x)
+		result = append(result, x)
 	}
 
-	render.JSON(w, r, "")
+	render.JSON(w, r, result)
 
 }
