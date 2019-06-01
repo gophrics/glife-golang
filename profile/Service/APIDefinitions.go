@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -83,11 +84,11 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func FindUser(w http.ResponseWriter, r *http.Request) {
-	ss := "Nitin"
+	ss := fmt.Sprintf(".*%s.*", "Nitin")
 
 	filter := bson.D{
 		{"$or", bson.A{
-			bson.D{{"name", bson.RegEx{"*%s*", ss}}},
+			bson.D{{"name", primitive.Regex{ss, ""}}},
 			bson.D{{"country", ss}},
 			bson.D{{"phone", ss}},
 		}}}
