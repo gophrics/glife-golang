@@ -7,7 +7,7 @@ type GetUserRequest struct {
 }
 
 type GetUserResponse struct {
-	ProfileId int64  `json:"profileId"`
+	ProfileId string `json:"id" bson:"_id"`
 	Name      string `json:"name"`
 	Email     string `json:"email"`
 	Phone     string `json:"phone"`
@@ -22,7 +22,7 @@ type RegisterUserRequest struct {
 }
 
 type RegisterUserResponse struct {
-	ProfileId string `json:"profileId"`
+	ProfileId string `json:"id" bson:"_id"`
 	Name      string `json:"name"`
 	Email     string `json:"email"`
 	Phone     string `json:"phone"`

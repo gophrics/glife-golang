@@ -12,11 +12,13 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Post("/api/v1/profile/register", RegisterUser)
+	router.Post("/api/v1/profile/search", FindUser)
 	router.Get("/api/v1/profile/getuser/{profileId}", GetUser)
 	return router
 }
@@ -60,10 +62,10 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	// If struct not initialzed, inner variables don't exist
 
-	profileId := chi.URLParam(r, "profileId")
+	profileId := fmt.Sprintf("%s", chi.URLParam(r, "profileId"))
 
 	filter := bson.D{{
-		"profileId",
+		"_id",
 		bson.D{{
 			"$in",
 			bson.A{profileId},
@@ -81,4 +83,33 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func FindUser(w http.ResponseWriter, r *http.Request) {
+	ss := "Nitin"
+
+	filter := bson.D{
+		{"$or", bson.A{
+			bson.D{{"name", bson.RegEx{"*%s*", ss}}},
+			bson.D{{"country", ss}},
+			bson.D{{"phone", ss}},
+		}}}
+	findOptions := options.Find()
+
+	var result GetUserResponse
+
+	cur, err := mongodb.Profile.Find(context.TODO(), filter, findOptions)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for cur.Next(context.TODO()) {
+		err := cur.Decode(&result)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("%s", result)
+	}
+
+	render.JSON(w, r, "")
+
 }
