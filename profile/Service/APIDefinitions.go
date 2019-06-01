@@ -1,14 +1,17 @@
 package profile
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
-	"../../common/mysql"
+	"../../common/mongodb"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func Routes() *chi.Mux {
@@ -16,6 +19,10 @@ func Routes() *chi.Mux {
 	router.Post("/api/v1/profile/register", RegisterUser)
 	router.Get("/api/v1/profile/getuser/{profileId}", GetUser)
 	return router
+}
+
+func NewProfileId() string {
+	return "1"
 }
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
@@ -27,19 +34,26 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req User
+	var req RegisterUserRequest
 
 	json.Unmarshal(b, &req)
-	prep, _ := mysql.Instance.Prepare("INSERT INTO User VALUES (?,?,?,?)")
-	res, err := prep.Exec(req.ProfileId, req.Name, req.Phone, req.Country)
 
+	var result RegisterUserResponse
+	result.Country = req.Country
+	result.Email = req.Email
+	result.Name = req.Name
+	result.Phone = req.Phone
+	result.ProfileId = NewProfileId()
+
+	insertResult, err := mongodb.Profile.InsertOne(context.TODO(), result)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		log.Fatal(err)
 	}
+	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
 	response := make(map[string]string)
 	response["OperationStatus"] = "Success"
-	response["Result"] = fmt.Sprintf("%s", res)
+	response["Result"] = fmt.Sprintf("%s", result)
 	render.JSON(w, r, response)
 }
 
@@ -48,20 +62,23 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 	profileId := chi.URLParam(r, "profileId")
 
-	rows, err := mysql.Instance.Query("SELECT * from User where Id=?", profileId)
+	filter := bson.D{{
+		"profileId",
+		bson.D{{
+			"$in",
+			bson.A{profileId},
+		}},
+	}}
 
+	var result GetUserResponse
+
+	err := mongodb.Profile.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		log.Fatal(err)
 	}
 
-	var user User
-	for rows.Next() {
-		rows.Scan(&user.ProfileId, &user.Name, &user.Phone, &user.Country)
-	}
+	render.JSON(w, r, result)
+}
 
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-	}
-
-	render.JSON(w, r, user)
+func FindUser(w http.ResponseWriter, r *http.Request) {
 }
