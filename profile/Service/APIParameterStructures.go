@@ -18,15 +18,26 @@ type GetUserResponse struct {
 	Country   string             `json:"country"`
 }
 
-type RegisterUserRequest struct {
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Phone   string `json:"phone"`
-	Country string `json:"country"`
-}
-
 type RegisterUserWithGoogleRequest struct {
 	Token string `json:"token"`
+}
+
+type LoginUserWithGoogleRequest struct {
+	RegisterUserWithGoogleRequest
+	Email string `json:"email"`
+}
+
+type RegisterUserRequest struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Phone    string `json:"phone"`
+	Country  string `json:"country"`
+}
+
+type LoginUserRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type RegisterUserResponse struct {
