@@ -20,5 +20,5 @@ func main() {
 		log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
 	}
 
-	log.Fatal(http.ListenAndServe(":8080", router)) // Note, the port is usually gotten from the environment.
+	log.Fatal(http.ListenAndServe(":8082", router)) // Note, the port is usually gotten from the environment.
 }
