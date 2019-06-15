@@ -1,4 +1,4 @@
 export GOPATH=$(pwd)
 export GOBIN=$GOPATH/bin
-go get 
+go get
 go install

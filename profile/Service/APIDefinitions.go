@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"../../common/mongodb"
@@ -170,7 +169,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	// For example, registration with a non google email and trying to register later with a google email
 	insertResult, err := mongodb.Profile.InsertOne(context.TODO(), req)
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, "Registration failed, MongoDB unavailable at the moment", 500)
 	}
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
@@ -202,11 +201,13 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	// BIG TODO: Use JWT Token - this is hackable and unsecure
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, "Login failed, user not found", 500)
+		return
 	}
 
 	if profileInDB.Password != req.Password {
 		http.Error(w, "Login failed due to password mismatch", 500)
+		return
 	}
 
 	response := make(map[string]string)
@@ -232,7 +233,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 	err := mongodb.Profile.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, err)
 	}
 
 	render.JSON(w, r, result)
@@ -256,14 +257,14 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 	cur, err := mongodb.Profile.Find(context.TODO(), filter, findOptions)
 
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, err)
 	}
 
 	var x GetUserResponse
 	for cur.Next(context.TODO()) {
 		err := cur.Decode(&x)
 		if err != nil {
-			log.Fatal(err)
+			http.Error(w, err)
 		}
 
 		fmt.Printf("%s", x)

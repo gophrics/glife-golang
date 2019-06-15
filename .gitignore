@@ -5,3 +5,4 @@ bin/
 src/
 profile/bin
 profile/src
+mongodb/

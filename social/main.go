@@ -19,6 +19,6 @@ func main() {
 	if err := chi.Walk(router, walkFunc); err != nil {
 		log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
 	}
-        log.Printf("Running on PORT 8080\n")
-	log.Fatal(http.ListenAndServe(":8080", router)) // Note, the port is usually gotten from the environment.
+
+	log.Fatal(http.ListenAndServe(":8083", router)) // Note, the port is usually gotten from the environment.
 }
