@@ -12,6 +12,7 @@ type GetUserRequest struct {
 
 type GetUserResponse struct {
 	ProfileId primitive.ObjectID `json:"id" bson:"_id"`
+	Username  string             `json:"username"`
 	Name      string             `json:"name"`
 	Email     string             `json:"email"`
 	Phone     string             `json:"phone"`
@@ -29,6 +30,7 @@ type LoginUserWithGoogleRequest struct {
 
 type RegisterUserRequest struct {
 	Name     string `json:"name"`
+	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Phone    string `json:"phone"`

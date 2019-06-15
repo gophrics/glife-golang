@@ -58,7 +58,7 @@ func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &resp2)
 
 	fmt.Printf("%s", resp2.Aud)
-	if resp2.Aud != "249369235819-11cfia1ht584n1kmk6gh6kbba8ab429u.apps.googleusercontent.com" || resp2.Email != req.Email {
+	if resp2.Aud != GOOGLE_APP_ID || resp2.Email != req.Email {
 		http.Error(w, "Authentication failure because of, you know, reasons", 500)
 	}
 
@@ -70,7 +70,8 @@ func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
 
 	if err != nil {
-		http.Error(w, "Profile donot exist", 500)
+		http.Error(w, "Profile donot exist", 400)
+		return
 	}
 
 	// BIG TODO: Use JWT Token - this is hackable just by tampering response, and unsecure
@@ -107,8 +108,9 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	var resp2 GoogleAuthVerification
 	json.Unmarshal(body, &resp2)
 
-	if resp2.Aud != "249369235819-11cfia1ht584n1kmk6gh6kbba8ab429u.apps.googleusercontent.com" {
-		http.Error(w, err.Error(), 500)
+	if resp2.Aud != GOOGLE_APP_ID {
+		http.Error(w, err.Error(), 400)
+		return
 	}
 
 	// Check if user exist in database
@@ -116,21 +118,15 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 		{"email", resp2.Email},
 	}
 
-	var profileInDB GetUserResponse
+	var profileInDB RegisterUserRequest
 	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
 
 	if err == nil {
-		http.Error(w, "Profile already exist", 500)
+		http.Error(w, "Profile already exist", 400)
+		return
 	}
 
-	var result RegisterUserResponse
-	result.Country = ""
-	result.Email = resp2.Email
-	result.Name = resp2.Name
-	result.Phone = ""
-	result.ProfileId = primitive.NewObjectID()
-
-	insertResult, err := mongodb.Profile.InsertOne(context.TODO(), result)
+	result, insertResult, err := _RegisterUser(profileInDB)
 
 	if err != nil {
 		http.Error(w, err.Error(), 400)
@@ -157,20 +153,16 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	json.Unmarshal(b, &req)
 
-	var result RegisterUserResponse
-	result.Country = req.Country
-	result.Email = req.Email
-	result.Name = req.Name
-	result.Phone = req.Phone
-	result.ProfileId = primitive.NewObjectID()
+	result, insertResult, err := _RegisterUser(req)
+
+	if err != nil {
+		http.Error(w, "Registration failed, MongoDB unavailable at the moment", 500)
+	}
 
 	// BIG TODO: Hash Password
 	// TODO: Assuming single email, that need not be the case, user can have multiple emails linked to same account
 	// For example, registration with a non google email and trying to register later with a google email
-	insertResult, err := mongodb.Profile.InsertOne(context.TODO(), req)
-	if err != nil {
-		http.Error(w, "Registration failed, MongoDB unavailable at the moment", 500)
-	}
+
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
 	response := make(map[string]string)
@@ -233,7 +225,8 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 	err := mongodb.Profile.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
-		http.Error(w, err)
+		http.Error(w, err.Error(), 400)
+		return
 	}
 
 	render.JSON(w, r, result)
@@ -257,14 +250,16 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 	cur, err := mongodb.Profile.Find(context.TODO(), filter, findOptions)
 
 	if err != nil {
-		http.Error(w, err)
+		http.Error(w, err.Error(), 400)
+		return
 	}
 
 	var x GetUserResponse
 	for cur.Next(context.TODO()) {
 		err := cur.Decode(&x)
 		if err != nil {
-			http.Error(w, err)
+			http.Error(w, err.Error(), 500)
+			return
 		}
 
 		fmt.Printf("%s", x)

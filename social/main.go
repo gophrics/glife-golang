@@ -20,5 +20,6 @@ func main() {
 		log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
 	}
 
+	log.Printf("Listening to port 8083")
 	log.Fatal(http.ListenAndServe(":8083", router)) // Note, the port is usually gotten from the environment.
 }
