@@ -32,6 +32,61 @@ func NewProfileId() primitive.ObjectID {
 	return primitive.NewObjectID()
 }
 
+func LoginUser(w http.ResponseWriter, r *http.Request) {
+	token2 := r.Header.Get("Authorization")
+	tokenValid, _, tokenerr := authentication.VerifyJWTToken(token2)
+
+	if tokenerr != nil {
+		http.Error(w, tokenerr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !tokenValid {
+		http.Error(w, "Invalid token", http.StatusBadRequest)
+		return
+	}
+
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var req LoginUserRequest
+	json.Unmarshal(b, &req)
+
+	filter := bson.D{
+		{"email", req.Email},
+	}
+
+	var profileInDB RegisterUserRequest
+
+	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
+
+	// BIG TODO: Use JWT Token - this is hackable and unsecure
+	if err != nil {
+		http.Error(w, "Login failed, user not found", http.StatusBadRequest)
+		return
+	}
+
+	if profileInDB.Password != req.Password {
+		http.Error(w, "Login failed due to password mismatch", http.StatusBadRequest)
+		return
+	}
+
+	token, err := authentication.GenerateJWTToken(req.Email)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%s", token)
+
+	render.JSON(w, r, token)
+}
+
 func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -192,51 +247,9 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, token)
 }
 
-func LoginUser(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	var req LoginUserRequest
-	json.Unmarshal(b, &req)
-
-	filter := bson.D{
-		{"email", req.Email},
-	}
-
-	var profileInDB RegisterUserRequest
-
-	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
-
-	// BIG TODO: Use JWT Token - this is hackable and unsecure
-	if err != nil {
-		http.Error(w, "Login failed, user not found", http.StatusBadRequest)
-		return
-	}
-
-	if profileInDB.Password != req.Password {
-		http.Error(w, "Login failed due to password mismatch", http.StatusBadRequest)
-		return
-	}
-
-	token, err := authentication.GenerateJWTToken(req.Email)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("%s", token)
-
-	render.JSON(w, r, token)
-}
-
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	// If struct not initialzed, inner variables don't exist
-	token := r.Header.Get("User-Agent")
+	token := r.Header.Get("Authorization")
 	tokenValid, _, tokenerr := authentication.VerifyJWTToken(token)
 
 	if !tokenValid {

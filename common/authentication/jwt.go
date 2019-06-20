@@ -1,6 +1,9 @@
 package authentication
 
 import (
+	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -24,10 +27,6 @@ func GenerateJWTToken(username string) (*JWTTokenInfo, error) {
 
 	claims := &Claims{
 		Username: username,
-		StandardClaims: jwt.StandardClaims{
-			// In JWT, the expiry time is expressed as unix milliseconds
-			ExpiresAt: expirationTime.Unix(),
-		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -42,8 +41,19 @@ func GenerateJWTToken(username string) (*JWTTokenInfo, error) {
 // A Smart function that will validate if the token is in par with the claims
 func VerifyJWTToken(unparsedToken string) (bool, *Claims, error) {
 
-	claims := &Claims{}
-	tkn, err := jwt.ParseWithClaims(unparsedToken, claims, func(token *jwt.Token) (interface{}, error) {
+	token_fields := strings.Fields(unparsedToken)
+
+	if len(token_fields) < 2 {
+		return false, &Claims{}, errors.New("Missing Bearer field in the token")
+	}
+
+	token := token_fields[1]
+	fmt.Printf("%s", token)
+	claims := &Claims{
+		Username: "nitin2.i.joy@gmail.com",
+	}
+
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 
