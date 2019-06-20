@@ -21,6 +21,14 @@ func Routes() *chi.Mux {
 	router := chi.NewRouter()
 	router.Post("/api/v1/profile/register", RegisterUser)
 	router.Post("/api/v1/profile/login", LoginUser)
+	router.Route("/api/v1/profile", func(r chi.Router) {
+		r.Use(AuthenticationMiddleware)
+		r.Post("registerWithGoogle", RegisterUserWithGoogle)
+		r.Post("loginWithGoogle", LoginUserWithGoogle)
+		r.Get("search/{searchString}", FindUser)
+		r.Get("getuser/{profileId}", GetUser)
+
+	})
 	router.Post("/api/v1/profile/registerWithGoogle", RegisterUserWithGoogle)
 	router.Post("/api/v1/profile/loginWithGoogle", LoginUserWithGoogle)
 	router.Get("/api/v1/profile/search/{searchstring}", FindUser)
@@ -32,19 +40,29 @@ func NewProfileId() primitive.ObjectID {
 	return primitive.NewObjectID()
 }
 
+func AuthenticationMiddleware(next http.Handler) http.Handler {
+	return http.HandleFunc("AuthenticationHandler",
+		func(w http.ResponseWriter, r *http.Request) {
+			token2 := r.Header.Get("Authorization")
+
+			tokenValid, _, tokenerr := authentication.VerifyJWTToken(token2)
+
+			if tokenerr != nil {
+				http.Error(w, tokenerr.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if !tokenValid {
+				http.Error(w, "Invalid token", http.StatusBadRequest)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+			return
+		})
+}
+
 func LoginUser(w http.ResponseWriter, r *http.Request) {
-	token2 := r.Header.Get("Authorization")
-	tokenValid, _, tokenerr := authentication.VerifyJWTToken(token2)
-
-	if tokenerr != nil {
-		http.Error(w, tokenerr.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if !tokenValid {
-		http.Error(w, "Invalid token", http.StatusBadRequest)
-		return
-	}
 
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
