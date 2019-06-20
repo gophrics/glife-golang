@@ -7,59 +7,74 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
-	"../../common/authentication"
 	"../../common/mongodb"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var tokenAuth *jwtauth.JWTAuth
+
+type Claims struct {
+	jwt.Claims
+	Email string
+}
+
+func (m *Claims) Valid() error {
+	return nil
+}
+
+func init() {
+	tokenAuth = jwtauth.New("HS256", []byte("dasjkhfiuadufasdfasf832742389r923rc325235c7n6235"), nil)
+
+	// For debugging/example purposes, we generate and print
+	// a sample jwt token with claims `user_id:123` here:
+	_, tokenString, _ := tokenAuth.Encode(jwt.MapClaims{"user_id": 123})
+	fmt.Printf("DEBUG: a sample jwt is %s\n\n", tokenString)
+}
+
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
-	router.Post("/api/v1/profile/register", RegisterUser)
-	router.Post("/api/v1/profile/login", LoginUser)
-	router.Route("/api/v1/profile", func(r chi.Router) {
-		r.Use(AuthenticationMiddleware)
-		r.Post("registerWithGoogle", RegisterUserWithGoogle)
-		r.Post("loginWithGoogle", LoginUserWithGoogle)
-		r.Get("search/{searchString}", FindUser)
-		r.Get("getuser/{profileId}", GetUser)
 
+	router.Use(middleware.Recoverer)
+
+	// Protected routes
+	router.Group(func(r chi.Router) {
+		// Seek, verify and validate JWT tokens
+		r.Use(jwtauth.Verifier(tokenAuth))
+
+		// Handle valid / invalid tokens. In this example, we use
+		// the provided authenticator middleware, but you can write your
+		// own very easily, look at the Authenticator method in jwtauth.go
+		// and tweak it, its not scary.
+		r.Use(jwtauth.Authenticator)
+		r.Get("/api/v1/profile/search/{searchstring}", FindUser)
+		r.Get("/api/v1/profile/getuser", GetUser)
 	})
-	router.Post("/api/v1/profile/registerWithGoogle", RegisterUserWithGoogle)
-	router.Post("/api/v1/profile/loginWithGoogle", LoginUserWithGoogle)
-	router.Get("/api/v1/profile/search/{searchstring}", FindUser)
-	router.Get("/api/v1/profile/getuser/{profileId}", GetUser)
+
+	// Public routes
+	router.Group(func(r chi.Router) {
+		r.Post("/api/v1/profile/register", RegisterUser)
+		r.Post("/api/v1/profile/login", LoginUser)
+		r.Post("/api/v1/profile/registerWithGoogle", RegisterUserWithGoogle)
+		r.Post("/api/v1/profile/loginWithGoogle", LoginUserWithGoogle)
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("welcome anonymous"))
+		})
+	})
+
 	return router
 }
 
 func NewProfileId() primitive.ObjectID {
 	return primitive.NewObjectID()
-}
-
-func AuthenticationMiddleware(next http.Handler) http.Handler {
-	return http.HandleFunc("AuthenticationHandler",
-		func(w http.ResponseWriter, r *http.Request) {
-			token2 := r.Header.Get("Authorization")
-
-			tokenValid, _, tokenerr := authentication.VerifyJWTToken(token2)
-
-			if tokenerr != nil {
-				http.Error(w, tokenerr.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			if !tokenValid {
-				http.Error(w, "Invalid token", http.StatusBadRequest)
-				return
-			}
-
-			next.ServeHTTP(w, r)
-			return
-		})
 }
 
 func LoginUser(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +109,10 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := authentication.GenerateJWTToken(req.Email)
+	claim := jwt.MapClaims{"email": req.Email}
+	jwtauth.SetExpiryIn(claim, (1 * time.Minute))
+
+	_, token, err := tokenAuth.Encode(claim)
 
 	if err != nil {
 		log.Fatal(err)
@@ -149,7 +167,12 @@ func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// BIG TODO: Use JWT Token - this is hackable just by tampering response, and unsecure
-	token, err := authentication.GenerateJWTToken(req.Email)
+
+	claims := &Claims{
+		Email: resp2.Email,
+	}
+
+	_, token, err := tokenAuth.Encode(claims)
 
 	if err != nil {
 		log.Fatal(err)
@@ -216,7 +239,11 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Inserted document from google auth: ", insertResult)
 
-	token, err := authentication.GenerateJWTToken(result.Email)
+	claims := &Claims{
+		Email: result.Email,
+	}
+
+	_, token, err := tokenAuth.Encode(claims)
 
 	if err != nil {
 		log.Fatal(err)
@@ -254,7 +281,11 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
-	token, err := authentication.GenerateJWTToken(req.Email)
+	claims := &Claims{
+		Email: result.Email,
+	}
+
+	_, token, err := tokenAuth.Encode(claims)
 
 	if err != nil {
 		log.Fatal(err)
@@ -266,21 +297,18 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
+
+	token, claims, err2 := jwtauth.FromContext(r.Context())
+
+	if err2 != nil {
+		fmt.Printf("%s", err2.Error())
+		return
+	}
+
+	fmt.Printf("%s", token)
+	fmt.Printf("%s", claims)
 	// If struct not initialzed, inner variables don't exist
-	token := r.Header.Get("Authorization")
-	tokenValid, _, tokenerr := authentication.VerifyJWTToken(token)
-
-	if !tokenValid {
-		http.Error(w, "Invalid token", http.StatusBadRequest)
-		return
-	}
-
-	if tokenerr != nil {
-		http.Error(w, "Internal Server error", http.StatusInternalServerError)
-		return
-	}
-
-	profileId := fmt.Sprintf("%s", chi.URLParam(r, "profileId"))
+	profileId := fmt.Sprintf("%s", "nitin.i.joy@gmail.com")
 
 	filter := bson.D{{
 		"_id",
@@ -294,7 +322,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 	err := mongodb.Profile.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusGone)
 	}
 
 	render.JSON(w, r, result)
@@ -302,6 +330,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 func FindUser(w http.ResponseWriter, r *http.Request) {
 
+	fmt.Sprintf("FindUser called")
 	ss := fmt.Sprintf("%s", chi.URLParam(r, "searchstring"))
 	ss = fmt.Sprintf(".*%s.*", ss)
 
