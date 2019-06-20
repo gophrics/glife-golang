@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
+	"../../common/authentication"
 	"../../common/mongodb"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -74,10 +76,13 @@ func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// BIG TODO: Use JWT Token - this is hackable just by tampering response, and unsecure
-	response := make(map[string]string)
-	response["OperationStatus"] = "Success"
-	response["Result"] = fmt.Sprintf("%s", profileInDB)
-	render.JSON(w, r, response)
+	token, err := authentication.GenerateJWTToken(req.Email)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	render.JSON(w, r, token)
 }
 
 func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
@@ -138,10 +143,13 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Inserted document from google auth: ", insertResult)
 
-	response := make(map[string]string)
-	response["OperationStatus"] = "Success"
-	response["Result"] = fmt.Sprintf("%s", result)
-	render.JSON(w, r, response)
+	token, err := authentication.GenerateJWTToken(result.Email)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	render.JSON(w, r, token)
 }
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
@@ -173,10 +181,15 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
-	response := make(map[string]string)
-	response["OperationStatus"] = "Success"
-	response["Result"] = fmt.Sprintf("%s", result)
-	render.JSON(w, r, response)
+	token, err := authentication.GenerateJWTToken(req.Email)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%s", token)
+
+	render.JSON(w, r, token)
 }
 
 func LoginUser(w http.ResponseWriter, r *http.Request) {
@@ -184,7 +197,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -201,23 +214,40 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	// BIG TODO: Use JWT Token - this is hackable and unsecure
 	if err != nil {
-		http.Error(w, "Login failed, user not found", 500)
+		http.Error(w, "Login failed, user not found", http.StatusBadRequest)
 		return
 	}
 
 	if profileInDB.Password != req.Password {
-		http.Error(w, "Login failed due to password mismatch", 500)
+		http.Error(w, "Login failed due to password mismatch", http.StatusBadRequest)
 		return
 	}
 
-	response := make(map[string]string)
-	response["OperationStatus"] = "Success"
-	response["Result"] = "Login Success"
-	render.JSON(w, r, response)
+	token, err := authentication.GenerateJWTToken(req.Email)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%s", token)
+
+	render.JSON(w, r, token)
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	// If struct not initialzed, inner variables don't exist
+	token := r.Header.Get("User-Agent")
+	tokenValid, _, tokenerr := authentication.VerifyJWTToken(token)
+
+	if !tokenValid {
+		http.Error(w, "Invalid token", http.StatusBadRequest)
+		return
+	}
+
+	if tokenerr != nil {
+		http.Error(w, "Internal Server error", http.StatusInternalServerError)
+		return
+	}
 
 	profileId := fmt.Sprintf("%s", chi.URLParam(r, "profileId"))
 
@@ -233,7 +263,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 	err := mongodb.Profile.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
-		http.Error(w, err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	render.JSON(w, r, result)
@@ -257,14 +287,14 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 	cur, err := mongodb.Profile.Find(context.TODO(), filter, findOptions)
 
 	if err != nil {
-		http.Error(w, err)
+		http.Error(w, err.Error(), 500)
 	}
 
 	var x GetUserResponse
 	for cur.Next(context.TODO()) {
 		err := cur.Decode(&x)
 		if err != nil {
-			http.Error(w, err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
 		fmt.Printf("%s", x)
