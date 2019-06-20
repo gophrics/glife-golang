@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"../../common"
 	"../../common/mongodb"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
@@ -19,7 +20,7 @@ import (
 var tokenAuth *jwtauth.JWTAuth
 
 func init() {
-	tokenAuth = jwtauth.New("HS256", []byte("dasjkhfiuadufasdfasf832742389r923rc325235c7n6235"), nil)
+	tokenAuth = jwtauth.New("HS256", []byte(common.JWT_SECRET_KEY), nil)
 
 	// For debugging/example purposes, we generate and print
 	// a sample jwt token with claims `user_id:123` here:
@@ -36,12 +37,8 @@ func Routes() *chi.Mux {
 	router.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
 		r.Use(jwtauth.Verifier(tokenAuth))
-
-		// Handle valid / invalid tokens. In this example, we use
-		// the provided authenticator middleware, but you can write your
-		// own very easily, look at the Authenticator method in jwtauth.go
-		// and tweak it, its not scary.
 		r.Use(jwtauth.Authenticator)
+
 		r.Get("/api/v1/profile/search/{searchstring}", FindUser)
 		r.Get("/api/v1/profile/getuser", GetUser)
 	})
@@ -52,9 +49,6 @@ func Routes() *chi.Mux {
 		r.Post("/api/v1/profile/login", LoginUser)
 		r.Post("/api/v1/profile/registerWithGoogle", RegisterUserWithGoogle)
 		r.Post("/api/v1/profile/loginWithGoogle", LoginUserWithGoogle)
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("welcome anonymous"))
-		})
 	})
 
 	return router
@@ -62,17 +56,15 @@ func Routes() *chi.Mux {
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
 
-	token, claims, err2 := jwtauth.FromContext(r.Context())
+	_, claims, err2 := jwtauth.FromContext(r.Context())
 
 	if err2 != nil {
 		fmt.Printf("%s", err2.Error())
 		return
 	}
 
-	fmt.Printf("%s", token)
-	fmt.Printf("%s", claims)
 	// If struct not initialzed, inner variables don't exist
-	profileId := fmt.Sprintf("%s", "nitin.i.joy@gmail.com")
+	profileId := claims["email"]
 
 	filter := bson.D{{
 		"_id",
