@@ -33,7 +33,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		{"email", req.Email},
 	}
 
-	var profileInDB RegisterUserRequest
+	var profileInDB User
 
 	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
 
@@ -98,7 +98,7 @@ func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 		{"email", resp2.Email},
 	}
 
-	var profileInDB GetUserResponse
+	var profileInDB User
 	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
 
 	if err != nil {

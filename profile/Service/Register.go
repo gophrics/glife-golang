@@ -52,19 +52,20 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 		{"email", resp2.Email},
 	}
 
-	var profileInDB GetUserResponse
+	var profileInDB User
 	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
 
 	if err == nil {
 		http.Error(w, "Profile already exist", 500)
 	}
 
-	var result RegisterUserResponse
+	var result User
 	result.Country = ""
 	result.Email = resp2.Email
 	result.Name = resp2.Name
 	result.Phone = ""
 	result.ProfileId = primitive.NewObjectID()
+	result.Username = _GenerateUsername()
 
 	insertResult, err := mongodb.Profile.InsertOne(context.TODO(), result)
 
@@ -96,16 +97,9 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req RegisterUserRequest
+	var req User
 
 	json.Unmarshal(b, &req)
-
-	var result RegisterUserResponse
-	result.Country = req.Country
-	result.Email = req.Email
-	result.Name = req.Name
-	result.Phone = req.Phone
-	result.ProfileId = primitive.NewObjectID()
 
 	// BIG TODO: Hash Password
 	// TODO: Assuming single email, that need not be the case, user can have multiple emails linked to same account
@@ -117,7 +111,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
 	claims := jwt.MapClaims{
-		"email": result.Email,
+		"profileId": req.Email, // TODO: not email, profileID
 	}
 
 	_, token, err := tokenAuth.Encode(claims)

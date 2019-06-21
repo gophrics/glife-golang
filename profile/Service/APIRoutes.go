@@ -49,6 +49,7 @@ func Routes() *chi.Mux {
 		r.Post("/api/v1/profile/login", LoginUser)
 		r.Post("/api/v1/profile/registerWithGoogle", RegisterUserWithGoogle)
 		r.Post("/api/v1/profile/loginWithGoogle", LoginUserWithGoogle)
+		r.Get("/api/v1/profile/generate_username", GenerateUsername)
 	})
 
 	return router
@@ -64,8 +65,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If struct not initialzed, inner variables don't exist
-	profileId := claims["email"]
-
+	profileId := claims["profileId"]
 	filter := bson.D{{
 		"_id",
 		bson.D{{
@@ -74,7 +74,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		}},
 	}}
 
-	var result GetUserResponse
+	var result User
 
 	err := mongodb.Profile.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
@@ -82,6 +82,16 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, result)
+}
+
+func GenerateUsername(w http.ResponseWriter, r *http.Request) {
+
+	var response struct {
+		Username string
+	}
+
+	response.Username = _GenerateUsername()
+	render.JSON(w, r, response)
 }
 
 func FindUser(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +108,7 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 		}}}
 	findOptions := options.Find()
 
-	var result []GetUserResponse
+	var result []User
 
 	cur, err := mongodb.Profile.Find(context.TODO(), filter, findOptions)
 
@@ -106,7 +116,7 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 
-	var x GetUserResponse
+	var x User
 	for cur.Next(context.TODO()) {
 		err := cur.Decode(&x)
 		if err != nil {
