@@ -48,7 +48,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claim := jwt.MapClaims{"profileId": profileInDB.ProfileId}
+	claim := jwt.MapClaims{"profileid": profileInDB.ProfileId}
 	jwtauth.SetExpiryIn(claim, (1 * time.Minute))
 
 	_, token, err := tokenAuth.Encode(claim)
@@ -90,7 +90,7 @@ func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, &resp2)
 
 	fmt.Printf("%s", resp2.Aud)
-	if resp2.Aud != "249369235819-11cfia1ht584n1kmk6gh6kbba8ab429u.apps.googleusercontent.com" || resp2.Email != req.Email {
+	if resp2.Aud != common.GOOGLE_APP_ID || resp2.Email != req.Email {
 		http.Error(w, "Authentication failure because of, you know, reasons", 500)
 	}
 

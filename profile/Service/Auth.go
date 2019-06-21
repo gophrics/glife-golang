@@ -19,9 +19,9 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If struct not initialzed, inner variables don't exist
-	profileID := claims["profileId"]
+	profileID := claims["profileid"]
 
-	newClaim := jwt.MapClaims{"profileId": profileID}
+	newClaim := jwt.MapClaims{"profileid": profileID}
 
 	_, token, err := tokenAuth.Encode(newClaim)
 

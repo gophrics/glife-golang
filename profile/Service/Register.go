@@ -13,7 +13,6 @@ import (
 	"../../common/mongodb"
 	"github.com/go-chi/render"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +63,7 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	result.Email = resp2.Email
 	result.Name = resp2.Name
 	result.Phone = ""
-	result.ProfileId = primitive.NewObjectID()
+	result.ProfileId = GenerateProfileId()
 	result.Username = _GenerateUsername()
 
 	insertResult, err := mongodb.Profile.InsertOne(context.TODO(), result)
@@ -76,7 +75,7 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Inserted document from google auth: ", insertResult)
 
 	claims := jwt.MapClaims{
-		"email": result.Email,
+		"profileid": result.ProfileId,
 	}
 
 	_, token, err := tokenAuth.Encode(claims)
@@ -102,6 +101,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req User
 
 	json.Unmarshal(b, &req)
+	req.ProfileId = GenerateProfileId()
 
 	// BIG TODO: Hash Password
 	// TODO: Assuming single email, that need not be the case, user can have multiple emails linked to same account
@@ -113,7 +113,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
 	claims := jwt.MapClaims{
-		"profileId": req.Email, // TODO: not email, profileID
+		"profileid": req.ProfileId,
 	}
 
 	_, token, err := tokenAuth.Encode(claims)

@@ -1,7 +1,7 @@
 package chat
 
 type ChatMessage struct {
-	ProfileId  string `json:"profileId"`
+	ProfileId  string `json:"profileid"`
 	ChatroomID string `json:"chatroomId"`
 	Timestamp  string `json:"timestamp"`
 	Message    string `json:"message"`

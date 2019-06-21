@@ -25,6 +25,6 @@ type Step struct {
 
 type Trip struct {
 	TripInfo
-	ProfileId string `json:"profileId"`
+	ProfileId string `json:"profileid"`
 	Steps     []Step `json:"steps"`
 }

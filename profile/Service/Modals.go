@@ -1,9 +1,5 @@
 package profile
 
-import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
 type GetUserRequest struct {
 	Name    string `json:"name"`
 	Phone   string `json:"phone"`
@@ -11,14 +7,13 @@ type GetUserRequest struct {
 }
 
 type User struct {
-	ProfileId primitive.ObjectID `json:"id" bson:"_id"`
-	Username  string             `json:"username"`
-	Name      string             `json:"name"`
-	Email     string             `json:"email"`
-	Phone     string             `json:"phone"`
-	Country   string             `json:"country"`
-	Username  string             `json:"username"`
-	Password  string             `json:"password"`
+	ProfileId string `json:"profileid"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+	Country   string `json:"country"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
 }
 
 type RegisterUserWithGoogleRequest struct {

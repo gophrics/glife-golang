@@ -11,6 +11,7 @@ import (
 	"../../common/mongodb"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	"go.mongodb.org/mongo-driver/bson"
@@ -30,6 +31,8 @@ func init() {
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
 
+	router.Use(middleware.Recoverer)
+
 	router.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
 		r.Use(jwtauth.Verifier(tokenAuth))
@@ -37,6 +40,7 @@ func Routes() *chi.Mux {
 
 		router.Get("/api/v1/travel/getalltrips", GetAllTrips)
 		router.Post("/api/v1/travel/gettrip", GetTrip)
+		router.Post("/api/v1/travel/savetrip", SaveTrip)
 		router.Post("/api/v1/travel/gettriphash", CheckHashPerTrip)
 	})
 
@@ -50,13 +54,14 @@ func Routes() *chi.Mux {
 }
 
 func GetTrip(w http.ResponseWriter, r *http.Request) {
-	_, claims, err2 := jwtauth.FromContext(r.Context())
+	token, claims, err2 := jwtauth.FromContext(r.Context())
 
+	fmt.Printf("%s", token)
 	if err2 != nil {
 		fmt.Printf("%s", err2.Error())
 		return
 	}
-	var profileId string = fmt.Sprintf("%s", claims["profileid"])
+	var profileId = claims["profileid"]
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -70,7 +75,7 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 
 	var result Trip
 
-	filter := bson.D{{"tripId", tripData.TripId}, {"profileId", profileId}}
+	filter := bson.D{{"tripId", tripData.TripId}, {"profileid", profileId}}
 
 	err = mongodb.Travel.FindOne(context.TODO(), filter).Decode(&result)
 
@@ -82,18 +87,20 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllTrips(w http.ResponseWriter, r *http.Request) {
-	_, claims, err2 := jwtauth.FromContext(r.Context())
+	token, claims, err2 := jwtauth.FromContext(r.Context())
 
+	fmt.Printf("%s", token)
 	if err2 != nil {
-		fmt.Printf("%s", err2.Error())
+		http.Error(w, err2.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var profileId string = fmt.Sprintf("%s", claims["profileid"])
+	fmt.Printf("%s", claims)
+	var profileId = claims["profileid"]
 
 	var result []Trip
 
-	filter := bson.D{{"profileId", profileId}}
+	filter := bson.D{{"profileid", profileId}}
 
 	cur, err := mongodb.Travel.Find(context.TODO(), filter)
 
@@ -113,7 +120,7 @@ func GetAllTrips(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, result)
 }
 
-func SaveTravelInfo(w http.ResponseWriter, r *http.Request) {
+func SaveTrip(w http.ResponseWriter, r *http.Request) {
 	_, claims, err2 := jwtauth.FromContext(r.Context())
 
 	if err2 != nil {
@@ -137,13 +144,17 @@ func SaveTravelInfo(w http.ResponseWriter, r *http.Request) {
 
 	filter := bson.D{
 		{"tripId", req.TripId},
-		{"profileId", req.ProfileId},
+		{"profileid", req.ProfileId},
 	}
 
 	_, err = mongodb.Travel.UpdateOne(context.TODO(), filter, req)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		_, err2 := mongodb.Travel.InsertOne(context.TODO(), req)
+		if err2 != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 	response := make(map[string]string)
 	response["OperationStatus"] = "Success"
@@ -169,7 +180,7 @@ func CheckHashPerTrip(w http.ResponseWriter, r *http.Request) {
 
 	var req TripInfo
 	json.Unmarshal(b, &req)
-	filter := bson.D{{"tripId", req.TripId}, {"profileId", profileId}}
+	filter := bson.D{{"tripId", req.TripId}, {"profileid", profileId}}
 
 	var trip Trip
 	mongodb.Travel.FindOne(context.TODO(), filter).Decode(&trip)

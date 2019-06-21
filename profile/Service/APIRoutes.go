@@ -64,15 +64,8 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// If struct not initialzed, inner variables don't exist
-	profileId := claims["profileId"]
-	filter := bson.D{{
-		"_id",
-		bson.D{{
-			"$in",
-			bson.A{profileId},
-		}},
-	}}
+	profileId := claims["profileid"]
+	filter := bson.D{{"profileid", profileId}}
 
 	var result User
 
