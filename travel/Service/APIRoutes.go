@@ -38,16 +38,16 @@ func Routes() *chi.Mux {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		r.Use(jwtauth.Authenticator)
 
-		router.Get("/api/v1/travel/getalltrips", GetAllTrips)
-		router.Post("/api/v1/travel/gettrip", GetTrip)
-		router.Post("/api/v1/travel/savetrip", SaveTrip)
-		router.Post("/api/v1/travel/gettriphash", CheckHashPerTrip)
+		r.Get("/api/v1/travel/getalltrips", GetAllTrips)
+		r.Post("/api/v1/travel/gettrip", GetTrip)
+		r.Post("/api/v1/travel/savetrip", SaveTrip)
+		r.Post("/api/v1/travel/gettriphash", CheckHashPerTrip)
 	})
 
 	router.Group(func(r chi.Router) {
-		router.Post("/api/v1/travel/searchcoordinates", GetLocationFromCoordinates)
-		router.Post("/api/v1/travel/searchlocation", GetCoordinatesFromLocation)
-		router.Post("/api/v1/travel/searchweatherbylocation", GetWeatherByLocation)
+		r.Post("/api/v1/travel/searchcoordinates", GetLocationFromCoordinates)
+		r.Post("/api/v1/travel/searchlocation", GetCoordinatesFromLocation)
+		r.Post("/api/v1/travel/searchweatherbylocation", GetWeatherByLocation)
 	})
 
 	return router
@@ -87,15 +87,13 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllTrips(w http.ResponseWriter, r *http.Request) {
-	token, claims, err2 := jwtauth.FromContext(r.Context())
+	_, claims, err2 := jwtauth.FromContext(r.Context())
 
-	fmt.Printf("%s", token)
 	if err2 != nil {
 		http.Error(w, err2.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Printf("%s", claims)
 	var profileId = claims["profileid"]
 
 	var result []Trip
