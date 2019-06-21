@@ -1,7 +1,7 @@
 package travel
 
-type TravelInfo struct {
-	TravelId int64 `json:"travelId"`
+type TripInfo struct {
+	TripId int64 `json:"tripId"`
 }
 
 type Region struct {
@@ -17,13 +17,14 @@ type ImageData struct {
 	Timestamp int64  `json:"timestamp"`
 }
 
-type TravelData struct {
-	Region       Region           `json:"region"`
-	ImageData    []ImageData      `json:"imageData"`
-	TimelineData map[int][]string `json:"timelinedata"`
+type Step struct {
+	Id      int64       `json:"stepId"`
+	Images  []ImageData `json:"imageData"`
+	LatLong Region      `json:"latlong"`
 }
 
-type SaveTravelInfoType struct {
-	TravelId   int64        `json:"travelId"`
-	TravelInfo []TravelData `json:"travelInfo"`
+type Trip struct {
+	TripInfo
+	ProfileId string `json:"profileId"`
+	Steps     []Step `json:"steps"`
 }
