@@ -1,8 +1,7 @@
-package profile
+package travel
 
 type TravelInfo struct {
-	ProfileId int64 `json:"profileId"`
-	TravelId  int64 `json:"travelId"`
+	TravelId int64 `json:"travelId"`
 }
 
 type Region struct {
@@ -25,7 +24,6 @@ type TravelData struct {
 }
 
 type SaveTravelInfoType struct {
-	ProfileId  int64        `json:"profileId"`
 	TravelId   int64        `json:"travelId"`
 	TravelInfo []TravelData `json:"travelInfo"`
 }

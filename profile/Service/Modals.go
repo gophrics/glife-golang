@@ -10,13 +10,15 @@ type GetUserRequest struct {
 	Country string `json:"country"`
 }
 
-type GetUserResponse struct {
+type User struct {
 	ProfileId primitive.ObjectID `json:"id" bson:"_id"`
 	Username  string             `json:"username"`
 	Name      string             `json:"name"`
 	Email     string             `json:"email"`
 	Phone     string             `json:"phone"`
 	Country   string             `json:"country"`
+	Username  string             `json:"username"`
+	Password  string             `json:"password"`
 }
 
 type RegisterUserWithGoogleRequest struct {
@@ -28,26 +30,9 @@ type LoginUserWithGoogleRequest struct {
 	Email string `json:"email"`
 }
 
-type RegisterUserRequest struct {
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Phone    string `json:"phone"`
-	Country  string `json:"country"`
-}
-
 type LoginUserRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
-}
-
-type RegisterUserResponse struct {
-	ProfileId primitive.ObjectID `json:"id" bson:"_id"`
-	Name      string             `json:"name"`
-	Email     string             `json:"email"`
-	Phone     string             `json:"phone"`
-	Country   string             `json:"country"`
 }
 
 type GoogleAuthVerification struct {

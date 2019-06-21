@@ -6,3 +6,4 @@ src/
 profile/bin
 profile/src
 mongodb/
+pkg/
