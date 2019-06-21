@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"../../common"
 	"../../common/mongodb"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
@@ -53,7 +54,8 @@ func GetTravelInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Use claims to get profile Id
+	var username string = fmt.Sprintf("%s", claims["username"])
+
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -68,8 +70,7 @@ func GetTravelInfo(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(b, &req)
 	filter := bson.D{{"id", req.TravelId}}
 
-	var profileIdString = fmt.Sprintf("%s", req.ProfileId)
-	var collection = mongodb.Instance.Database("travel").Collection(profileIdString)
+	var collection = mongodb.Instance.Database("travel").Collection(username)
 
 	collection.FindOne(context.TODO(), filter).Decode(&result)
 
@@ -81,6 +82,15 @@ func GetTravelInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func SaveTravelInfo(w http.ResponseWriter, r *http.Request) {
+	_, claims, err2 := jwtauth.FromContext(r.Context())
+
+	if err2 != nil {
+		fmt.Printf("%s", err2.Error())
+		return
+	}
+
+	var username string = fmt.Sprintf("%s", claims["username"])
+
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -93,9 +103,8 @@ func SaveTravelInfo(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(b, &req)
 
 	filter := bson.D{{"id", req.TravelId}}
-	var profileIdString = fmt.Sprintf("%s", req.ProfileId)
 
-	var collection = mongodb.Instance.Database("travel").Collection(profileIdString)
+	var collection = mongodb.Instance.Database("travel").Collection(username)
 
 	collection.UpdateOne(context.TODO(), filter, req.TravelInfo)
 

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"../../common"
 	"../../common/mongodb"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
@@ -37,7 +38,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
 
-	// BIG TODO: Use JWT Token - this is hackable and unsecure
 	if err != nil {
 		http.Error(w, "Login failed, user not found", http.StatusBadRequest)
 		return
@@ -48,7 +48,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claim := jwt.MapClaims{"email": req.Email}
+	claim := jwt.MapClaims{"profileId": profileInDB.ProfileId}
 	jwtauth.SetExpiryIn(claim, (1 * time.Minute))
 
 	_, token, err := tokenAuth.Encode(claim)
@@ -114,8 +114,10 @@ func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	_, token, err := tokenAuth.Encode(claims)
 
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	render.JSON(w, r, token)
+	var response common.Token
+	response.Token = token
+	render.JSON(w, r, response)
 }

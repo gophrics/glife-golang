@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
 
+	"../../common"
 	"../../common/mongodb"
 	"github.com/go-chi/render"
 	"go.mongodb.org/mongo-driver/bson"
@@ -82,10 +82,12 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	_, token, err := tokenAuth.Encode(claims)
 
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	render.JSON(w, r, token)
+	var response common.Token
+	response.Token = token
+	render.JSON(w, r, response)
 }
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
@@ -117,10 +119,12 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	_, token, err := tokenAuth.Encode(claims)
 
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	fmt.Printf("%s", token)
 
-	render.JSON(w, r, token)
+	var response common.Token
+	response.Token = token
+	render.JSON(w, r, response)
 }
