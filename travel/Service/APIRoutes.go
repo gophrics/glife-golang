@@ -54,9 +54,8 @@ func Routes() *chi.Mux {
 }
 
 func GetTrip(w http.ResponseWriter, r *http.Request) {
-	token, claims, err2 := jwtauth.FromContext(r.Context())
+	_, claims, err2 := jwtauth.FromContext(r.Context())
 
-	fmt.Printf("%s", token)
 	if err2 != nil {
 		fmt.Printf("%s", err2.Error())
 		return
@@ -66,7 +65,7 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -75,12 +74,14 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 
 	var result Trip
 
-	filter := bson.D{{"tripId", tripData.TripId}, {"profileid", profileId}}
+	fmt.Printf("%s %s", tripData.TripId, profileId)
+	filter := bson.D{{"tripid", tripData.TripId}, {"profileid", profileId}}
 
 	err = mongodb.Travel.FindOne(context.TODO(), filter).Decode(&result)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	render.JSON(w, r, result)
