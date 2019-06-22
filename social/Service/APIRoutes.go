@@ -1,16 +1,12 @@
 package social
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
+	neo4jd "../../common/neo4j"
+
 	"../../common"
-	"../../common/dgraph"
-	"github.com/dgraph-io/dgo/protos/api"
-	"github.com/dgraph-io/dgo/y"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
@@ -40,49 +36,42 @@ func init() {
 }
 
 func Follow(w http.ResponseWriter, r *http.Request) {
-	_, claims, err2 := jwtauth.FromContext(r.Context())
+	/*
+		_, claims, err2 := jwtauth.FromContext(r.Context())
 
-	if err2 != nil {
-		fmt.Printf("%s", err2.Error())
+		if err2 != nil {
+			fmt.Printf("%s", err2.Error())
+			return
+		}
+
+
+				var profileId = claims["profileid"]
+				b, err := ioutil.ReadAll(r.Body)
+				defer r.Body.Close()
+
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+	*/
+
+	_, err := neo4jd.Session.Run("CREATE (n:Item { id: $id, name: $name }) RETURN n.id, n.name", map[string]interface{}{
+		"id":   1,
+		"name": "Item 1",
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError) // handle error
 		return
 	}
 
-	var profileId = claims["profileid"]
-	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	for result.Next() {
+		fmt.Printf("Created Item with Id = '%d' and Name = '%s'\n", result.Record().GetByIndex(0).(int64), result.Record().GetByIndex(1).(string))
 	}
-
-	var socialData struct {
-		Uid       string   `json:"profileId"`
-		Following []string `json:"following"`
-	}
-	json.Unmarshal(b, &socialData)
-
-	socialData.Uid = fmt.Sprintf("%s", profileId)
-
-	encodedSocialData, err := json.Marshal(socialData)
-
-	mu := &api.Mutation{
-		SetJson: encodedSocialData,
-	}
-
-	txn := dgraph.Instance.NewTxn()
-	_, err = txn.Mutate(context.TODO(), mu)
-
-	if err != nil {
+	if err = result.Err(); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	err = txn.Commit(context.TODO())
-	if err == y.ErrAborted {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	defer txn.Discard(context.TODO())
 }
 
 func Like(w http.ResponseWriter, r *http.Request) {
