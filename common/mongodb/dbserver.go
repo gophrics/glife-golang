@@ -13,6 +13,7 @@ import (
 var Instance *mongo.Client
 var Profile *mongo.Collection
 var Travel *mongo.Collection
+var Social *mongo.Collection
 
 func openDB() {
 	Instance, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
@@ -26,6 +27,7 @@ func openDB() {
 	}
 	Profile = Instance.Database("glimpse").Collection("profile")
 	Travel = Instance.Database("glimpse").Collection("travel")
+	Social = Instance.Database("glimpse").Collection("social")
 }
 
 func init() {
