@@ -56,17 +56,17 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 			}
 	*/
 
-	_, err := neo4jd.Session.Run("CREATE (n:Item { id: $id, name: $name }) RETURN n.id, n.name", map[string]interface{}{
-		"id":   1,
-		"name": "Item 1",
+	result, err := neo4jd.Session.Run("MERGE (n {name: $name})", map[string]interface{}{
+		"name": "Item 2",
 	})
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError) // handle error
 		return
 	}
 
 	for result.Next() {
-		fmt.Printf("Created Item with Id = '%d' and Name = '%s'\n", result.Record().GetByIndex(0).(int64), result.Record().GetByIndex(1).(string))
+		fmt.Printf("Created Item with Name = '%s'\n", result.Record().GetByIndex(0).(string))
 	}
 	if err = result.Err(); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
