@@ -1,7 +1,9 @@
 package social
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	neo4jd "../../common/neo4j"
@@ -10,6 +12,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
+	"github.com/go-chi/render"
 )
 
 func Routes() *chi.Mux {
@@ -35,43 +38,47 @@ func init() {
 	fmt.Printf("DEBUG: a sample jwt is %s\n\n", tokenString)
 }
 
+/*
+MERGE (n {name: '3'}) //Create if a node with name='3' does not exist else match it
+MERGE (test2 {name:'2'}) //Create if a node with name='2' does not exist else match it
+MERGE (n)-[:know {r:'123'}]->(test2) //Create the relation between these nodes if it does not already exist
+*/
+
 func Follow(w http.ResponseWriter, r *http.Request) {
-	/*
-		_, claims, err2 := jwtauth.FromContext(r.Context())
 
-		if err2 != nil {
-			fmt.Printf("%s", err2.Error())
-			return
-		}
+	_, claims, err2 := jwtauth.FromContext(r.Context())
 
-
-				var profileId = claims["profileid"]
-				b, err := ioutil.ReadAll(r.Body)
-				defer r.Body.Close()
-
-
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-	*/
-
-	result, err := neo4jd.Session.Run("MERGE (n {name: $name})", map[string]interface{}{
-		"name": "Item 2",
-	})
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError) // handle error
+	if err2 != nil {
+		fmt.Printf("%s", err2.Error())
 		return
 	}
 
-	for result.Next() {
-		fmt.Printf("Created Item with Name = '%s'\n", result.Record().GetByIndex(0).(string))
-	}
-	if err = result.Err(); err != nil {
+	var profileId = claims["profileid"]
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
+	var followProfiles FollowRequest
+
+	json.Unmarshal(b, &followProfiles)
+
+	for _, followProfile := range followProfiles.Following {
+		_, err = neo4jd.Session.Run(`	MERGE(a: Person {profileId: $myid})
+										MATCH(m: Person {profileId: $id})
+										MERGE(a)-[:relationshipName]->(m)`, map[string]interface{}{
+			"id":   followProfile,
+			"myid": profileId,
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError) // handle error
+		}
+	}
+
+	render.JSON(w, r, "")
 }
 
 func Like(w http.ResponseWriter, r *http.Request) {
