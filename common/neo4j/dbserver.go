@@ -2,7 +2,8 @@ package neo4jd
 
 import (
 	"log"
-	"neo4j-go-driver/neo4j"
+
+	neo4j "github.com/issacnitin/neo4j-go-driver"
 )
 
 var (
