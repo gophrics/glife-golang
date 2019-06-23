@@ -11,6 +11,6 @@ ADD ./common /work/common
 WORKDIR /work/travel
 RUN go get
 RUN go install
-CMD ./run_background.sh
+CMD ./bin/travel
 
 EXPOSE 8082/tcp
