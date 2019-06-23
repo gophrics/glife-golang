@@ -2,6 +2,7 @@ package mongodb
 
 import (
 	"context"
+	"log"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql" //Importing mysql connector for golang
@@ -18,12 +19,12 @@ var Social *mongo.Collection
 func openDB() {
 	Instance, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
-		panic(err)
+		log.Printf("%s", err)
 	}
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = Instance.Connect(ctx)
 	if err != nil {
-		panic(err)
+		log.Printf("%s", err)
 	}
 	Profile = Instance.Database("glimpse").Collection("profile")
 	Travel = Instance.Database("glimpse").Collection("travel")
@@ -32,4 +33,14 @@ func openDB() {
 
 func init() {
 	openDB()
+	go healthChecks()
+}
+
+func healthChecks() {
+	for true {
+		if Instance == nil || Profile == nil || Travel == nil || Social == nil {
+			openDB()
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 }

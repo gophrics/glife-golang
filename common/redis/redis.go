@@ -1,6 +1,10 @@
 package redis
 
-import "github.com/go-redis/redis"
+import (
+	"time"
+
+	"github.com/go-redis/redis"
+)
 
 // Instance : Singleton Instance
 var Instance *redis.Client
@@ -11,10 +15,24 @@ type GeoLocation = redis.GeoLocation
 // GeoRadiusQuery : redis.GeoRadiusQuery
 type GeoRadiusQuery = redis.GeoRadiusQuery
 
-func init() {
+func openDB() {
 	Instance = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
+}
+
+func init() {
+	openDB()
+	go healthChecks()
+}
+
+func healthChecks() {
+	for true {
+		if Instance == nil {
+			openDB()
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 }

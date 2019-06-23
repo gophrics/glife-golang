@@ -2,6 +2,7 @@ package neo4jd
 
 import (
 	"log"
+	"time"
 
 	neo4j "github.com/issacnitin/neo4j-go-driver"
 )
@@ -16,13 +17,27 @@ var (
 var Instance neo4j.Driver
 var Session neo4j.Session
 
-func init() {
+func openDB() {
 	Instance, err := neo4j.NewDriver("bolt://localhost:7687", neo4j.BasicAuth("neo4j", "abc", ""))
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("%s", err)
 	}
 
 	if Session, err = Instance.Session(neo4j.AccessModeWrite); err != nil {
-		log.Fatal(err)
+		log.Printf("%s", err)
+	}
+}
+
+func init() {
+	openDB()
+	go healthChecks()
+}
+
+func healthChecks() {
+	for true {
+		if Instance == nil || Session == nil {
+			openDB()
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
 }
