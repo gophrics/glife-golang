@@ -40,7 +40,7 @@ func init() {
 func healthChecks() {
 	for true {
 		if Instance == nil || Profile == nil || Travel == nil || Social == nil {
-			fmt.Printf("Mongo unhealthy")
+			fmt.Printf("Mongo unhealthy\n")
 			openDB()
 		}
 		time.Sleep(10 * time.Second)

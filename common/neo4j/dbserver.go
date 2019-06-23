@@ -1,6 +1,7 @@
 package neo4jd
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -18,7 +19,7 @@ var Instance neo4j.Driver
 var Session neo4j.Session
 
 func openDB() {
-	Instance, err := neo4j.NewDriver("bolt://neo4j:7687", neo4j.BasicAuth("neo4j", "abc", ""))
+	Instance, err := neo4j.NewDriver("bolt://neo4j:7687", neo4j.BasicAuth("neo4j", "neo4j", ""))
 	if err != nil {
 		log.Printf("%s", err)
 	}
@@ -36,6 +37,7 @@ func init() {
 func healthChecks() {
 	for true {
 		if Instance == nil || Session == nil {
+			fmt.Printf("neo4j unhealthy\n")
 			openDB()
 		}
 		time.Sleep(100 * time.Millisecond)
