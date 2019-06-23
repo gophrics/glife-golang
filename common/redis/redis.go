@@ -18,7 +18,7 @@ type GeoRadiusQuery = redis.GeoRadiusQuery
 
 func openDB() {
 	Instance = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     "redis:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
@@ -35,6 +35,6 @@ func healthChecks() {
 			fmt.Printf("Redis unhealthy\n")
 			openDB()
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Second)
 	}
 }

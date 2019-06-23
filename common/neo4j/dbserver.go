@@ -40,6 +40,6 @@ func healthChecks() {
 			fmt.Printf("neo4j unhealthy\n")
 			openDB()
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Second)
 	}
 }
