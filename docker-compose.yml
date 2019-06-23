@@ -1,32 +1,50 @@
 version: '3'
 services:
   profile:
-    build: ./profile
+    build:
+      context: .
+      dockerfile: ./profile/Dockerfile
     ports:
     - "8080:8080"
     depends_on:
     - mongo
   travel: 
-    build: ./travel
+    build:
+      context: .
+      dockerfile: ./travel/Dockerfile
     ports:
     - "8082:8082"
     depends_on:
     - mongo
     - redis
   social:
-    build: ./social
+    build:
+      context: .
+      dockerfile: ./social/Dockerfile
     ports:
     - "8083:8083"
     depends_on:
     - mongo
     - neo4j
   redis:
-    image: redis
+    image: redis:latest
+    ports:
+    - "6379:6379"
   mongo:
-    image: mongo
+    image: mongo:latest
     ports:
     - "27017:27017"
+    volumes:
+      - $HOME/mongod:/data/db
   neo4j:
-    image: neo4j
-volumes:
-  logvolume01: {}
+    image: neo4j:latest
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - $HOME/neo4j/data:/data
+      - $HOME/neo4j/logs:/logs
+      - $HOME/neo4j/import:/var/lib/neo4j/import
+      - $HOME/neo4j/plugins:/plugins
+    environment:
+      - NEO4JAUTH=neo4j/abc

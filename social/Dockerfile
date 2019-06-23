@@ -17,6 +17,6 @@ RUN rm seabolt-1.7.4-Linux-ubuntu-18.04.deb
 WORKDIR /work/social
 RUN go get
 RUN go install
-RUN ./bin/social
+CMD ./run_background.sh
 
 EXPOSE 8083/tcp

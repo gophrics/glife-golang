@@ -11,6 +11,6 @@ ADD ./common /work/common
 WORKDIR /work/profile
 RUN go get
 RUN go install
-RUN ./bin/profile
+CMD ./run_background.sh
 
 EXPOSE 8080/tcp
