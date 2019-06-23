@@ -1,0 +1,32 @@
+version: '3'
+services:
+  profile:
+    build: ./profile
+    ports:
+    - "8080:8080"
+    depends_on:
+    - mongo
+  travel: 
+    build: ./travel
+    ports:
+    - "8082:8082"
+    depends_on:
+    - mongo
+    - redis
+  social:
+    build: ./social
+    ports:
+    - "8083:8083"
+    depends_on:
+    - mongo
+    - neo4j
+  redis:
+    image: redis
+  mongo:
+    image: mongo
+    ports:
+    - "27017:27017"
+  neo4j:
+    image: neo4j
+volumes:
+  logvolume01: {}
