@@ -38,7 +38,7 @@ func Routes() *chi.Mux {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		r.Use(jwtauth.Authenticator)
 
-		r.Get("/api/v1/travel/getalltrips", GetAllTrips)
+		r.Get("/api/v1/travel/getalltrips/{profileid}", GetAllTrips)
 		r.Post("/api/v1/travel/gettrip", GetTrip)
 		r.Post("/api/v1/travel/savetrip", SaveTrip)
 		r.Post("/api/v1/travel/gettriphash", CheckHashPerTrip)
@@ -96,6 +96,14 @@ func GetAllTrips(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var profileId = claims["profileid"]
+	var myOwn = true
+	// Check if Profile is there in the parameter
+	ss := fmt.Sprintf("%s", chi.URLParam(r, "profileid"))
+
+	if ss != "" {
+		profileId = ss
+		myOwn = false
+	}
 
 	var result []Trip
 
@@ -113,7 +121,9 @@ func GetAllTrips(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-		result = append(result, elem)
+		if myOwn || elem.Public {
+			result = append(result, elem)
+		}
 	}
 
 	render.JSON(w, r, result)

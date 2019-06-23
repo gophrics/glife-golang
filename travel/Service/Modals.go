@@ -27,4 +27,5 @@ type Trip struct {
 	TripId    int    `json:"tripId"`
 	ProfileId string `json:"profileId"`
 	Steps     []Step `json:"steps"`
+	Public    bool   `json:"public"`
 }
