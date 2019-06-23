@@ -2,7 +2,7 @@ package mongodb
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql" //Importing mysql connector for golang
@@ -17,14 +17,15 @@ var Travel *mongo.Collection
 var Social *mongo.Collection
 
 func openDB() {
-	Instance, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	fmt.Printf("openDB called")
+	Instance, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongo:27017"))
 	if err != nil {
-		log.Printf("%s", err)
+		fmt.Printf("%s", err.Error())
 	}
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = Instance.Connect(ctx)
 	if err != nil {
-		log.Printf("%s", err)
+		fmt.Printf("%s", err.Error())
 	}
 	Profile = Instance.Database("glimpse").Collection("profile")
 	Travel = Instance.Database("glimpse").Collection("travel")
@@ -39,8 +40,9 @@ func init() {
 func healthChecks() {
 	for true {
 		if Instance == nil || Profile == nil || Travel == nil || Social == nil {
+			fmt.Printf("Mongo unhealthy")
 			openDB()
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Second)
 	}
 }

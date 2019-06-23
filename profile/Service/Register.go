@@ -109,6 +109,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	insertResult, err := mongodb.Profile.InsertOne(context.TODO(), req)
 	if err != nil {
 		http.Error(w, "Registration failed, MongoDB unavailable at the moment", 500)
+		return
 	}
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 

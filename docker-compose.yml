@@ -33,7 +33,7 @@ services:
   mongo:
     image: mongo:latest
     ports:
-    - "27017:27017"
+      - "27017:27017"
     volumes:
       - $HOME/mongod:/data/db
   neo4j:
