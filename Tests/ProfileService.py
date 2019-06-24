@@ -3,6 +3,17 @@ import Utils
 import Context
 import json
 
+
+# Public API
+def username_exist():
+    username = Utils.generate_username()
+    print("http://localhost:8080/api/v1/profile/username_exist")
+    url = 'http://localhost:8080/api/v1/profile/username_exist/' + username
+    r = requests.Session()
+    response = r.get(url)
+    print(str(response.status_code))
+    print(str(response.content))
+
 def register():
     print("http://localhost:8080/api/v1/profile/register")
     url = 'http://localhost:8080/api/v1/profile/register'
@@ -29,6 +40,7 @@ def register():
     if response.status_code == 200:
         print("Token: " + response.json()['Token'])
         Context.token = response.json()['Token']
+        Context.username = name
         return True
     else:
         print("Response: " + str(response.content))

@@ -38,7 +38,7 @@ func Routes() *chi.Mux {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		r.Use(jwtauth.Authenticator)
 
-		r.Get("/api/v1/travel/getalltrips/{profileid}", GetAllTrips)
+		r.Get("/api/v1/travel/getalltrips/{username}", GetAllTrips)
 		r.Post("/api/v1/travel/gettrip", GetTrip)
 		r.Post("/api/v1/travel/savetrip", SaveTrip)
 		r.Post("/api/v1/travel/gettriphash", CheckHashPerTrip)
@@ -103,10 +103,23 @@ func GetAllTrips(w http.ResponseWriter, r *http.Request) {
 	var profileId = claims["profileid"]
 	var myOwn = true
 	// Check if Profile is there in the parameter
-	ss := fmt.Sprintf("%s", chi.URLParam(r, "profileid"))
+	ss := fmt.Sprintf("%s", chi.URLParam(r, "username"))
 
 	if ss != "" {
-		profileId = ss
+		resp, err := http.Get(fmt.Sprintf("http://profile:8080/api/v1/profile/getuserwithusername/%s", ss))
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		defer resp.Body.Close()
+		b, err := ioutil.ReadAll(resp.Body)
+
+		var user common.User
+		json.Unmarshal(b, &user)
+
+		profileId = user.ProfileId
 		myOwn = false
 	}
 
@@ -158,7 +171,7 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 
 	filter := bson.D{
 		{"tripId", req.TripId},
-		{"profileid", req.ProfileId},
+		{"profileid", profileId},
 	}
 
 	_, err = mongodb.Travel.UpdateOne(context.TODO(), filter, req)

@@ -62,12 +62,11 @@ func UsernameExist(w http.ResponseWriter, r *http.Request) {
 	ss := fmt.Sprintf("%s", chi.URLParam(r, "username"))
 	_, err := redis.Instance.Get(ss).Result()
 
-	if err != nil {
-		render.JSON(w, r, false)
-		return
+	var response struct {
+		Result bool
 	}
-
-	render.JSON(w, r, false)
+	response.Result = err != nil
+	render.JSON(w, r, response)
 	return
 }
 
@@ -79,7 +78,7 @@ func GetUserWithUsername(w http.ResponseWriter, r *http.Request) {
 		{"username", ss},
 	}
 
-	var result User
+	var result common.User
 
 	err := mongodb.Profile.FindOne(context.TODO(), filter).Decode(&result)
 	result.Password = ""
@@ -105,7 +104,7 @@ func GetMe(w http.ResponseWriter, r *http.Request) {
 	profileId := claims["profileid"]
 	filter := bson.D{{"profileid", profileId}}
 
-	var result User
+	var result common.User
 
 	err := mongodb.Profile.FindOne(context.TODO(), filter).Decode(&result)
 	result.Password = ""
@@ -127,6 +126,7 @@ func GenerateUsername(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, response)
 }
 
+// Untested
 func FindUser(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Sprintf("FindUser called")
@@ -141,7 +141,7 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 		}}}
 	findOptions := options.Find()
 
-	var result []User
+	var result []common.User
 
 	cur, err := mongodb.Profile.Find(context.TODO(), filter, findOptions)
 
@@ -149,7 +149,7 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 
-	var x User
+	var x common.User
 	for cur.Next(context.TODO()) {
 		err := cur.Decode(&x)
 		if err != nil {

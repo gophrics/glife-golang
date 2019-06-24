@@ -52,14 +52,14 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 		{"email", resp2.Email},
 	}
 
-	var profileInDB User
+	var profileInDB common.User
 	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
 
 	if err == nil {
 		http.Error(w, "Profile already exist", 500)
 	}
 
-	var result User
+	var result common.User
 	result.Country = ""
 	result.Email = resp2.Email
 	result.Name = resp2.Name
@@ -99,7 +99,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req User
+	var req common.User
 
 	json.Unmarshal(b, &req)
 	if req.Email == "" || req.Phone == "" || req.Password == "" {

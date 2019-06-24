@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"../../common"
 	"../../common/mongodb"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,9 +22,9 @@ func GetEmailFromProfileId() string {
 	return "stub"
 }
 
-func _RegisterUser(req User) (User, *mongo.InsertOneResult, error) {
+func _RegisterUser(req common.User) (common.User, *mongo.InsertOneResult, error) {
 
-	var result User
+	var result common.User
 	result.Country = req.Country
 	result.Email = req.Email
 	result.Name = req.Name

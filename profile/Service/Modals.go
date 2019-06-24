@@ -6,16 +6,6 @@ type GetUserRequest struct {
 	Country string `json:"country"`
 }
 
-type User struct {
-	ProfileId string `json:"profileid"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	Phone     string `json:"phone"`
-	Country   string `json:"country"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
-}
-
 type RegisterUserWithGoogleRequest struct {
 	Token string `json:"token"`
 }

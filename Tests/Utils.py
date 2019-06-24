@@ -22,3 +22,25 @@ def generate_phone():
 
 def generate_country():
     return "India"
+
+def generate_region():
+    region = dict()
+    region['latitude'] = str(random.randint(0, 1000)/100)
+    region['longitude'] = str(random.randint(0, 1000)/100)
+    return region
+
+def generate_step():
+    step = dict()
+    step['stepId'] = str(random.randint(0, 100))
+    step['latlong'] = generate_region()
+    return step
+
+def generate_trip():
+    trip = dict()
+    trip['tripId'] = str(random.randint(0, 100))
+    trip['steps'] = []
+    trip['steps'].append(generate_step())
+    trip['steps'].append(generate_step())
+    trip['steps'].append(generate_step())
+    trip['public'] = True
+    return trip

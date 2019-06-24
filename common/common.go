@@ -6,3 +6,13 @@ const GOOGLE_APP_ID = "249369235819-11cfia1ht584n1kmk6gh6kbba8ab429u.apps.google
 type Token struct {
 	Token string
 }
+
+type User struct {
+	ProfileId string `json:"profileid"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+	Country   string `json:"country"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+}
