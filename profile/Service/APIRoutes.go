@@ -7,6 +7,7 @@ import (
 
 	"../../common"
 	"../../common/mongodb"
+	"../../common/redis"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -40,7 +41,8 @@ func Routes() *chi.Mux {
 		r.Use(jwtauth.Authenticator)
 
 		r.Get("/api/v1/profile/search/{searchstring}", FindUser)
-		r.Get("/api/v1/profile/getuser", GetUser)
+		r.Get("/api/v1/profile/getme", GetMe)
+		r.Get("/api/v1/profile/getuserwithusername/{username}", GetUserWithUsername)
 	})
 
 	// Public routes
@@ -50,12 +52,48 @@ func Routes() *chi.Mux {
 		r.Post("/api/v1/profile/registerWithGoogle", RegisterUserWithGoogle)
 		r.Post("/api/v1/profile/loginWithGoogle", LoginUserWithGoogle)
 		r.Get("/api/v1/profile/generate_username", GenerateUsername)
+		r.Get("/api/v1/profile/username_exist/{username}", UsernameExist)
 	})
 
 	return router
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
+func UsernameExist(w http.ResponseWriter, r *http.Request) {
+	ss := fmt.Sprintf("%s", chi.URLParam(r, "username"))
+	_, err := redis.Instance.Get(ss).Result()
+
+	if err != nil {
+		render.JSON(w, r, false)
+		return
+	}
+
+	render.JSON(w, r, false)
+	return
+}
+
+func GetUserWithUsername(w http.ResponseWriter, r *http.Request) {
+
+	ss := fmt.Sprintf("%s", chi.URLParam(r, "username"))
+
+	filter := bson.D{
+		{"username", ss},
+	}
+
+	var result User
+
+	err := mongodb.Profile.FindOne(context.TODO(), filter).Decode(&result)
+	result.Password = ""
+	result.Phone = ""
+	result.Email = ""
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusGone)
+	}
+
+	render.JSON(w, r, result)
+}
+
+func GetMe(w http.ResponseWriter, r *http.Request) {
 
 	_, claims, err2 := jwtauth.FromContext(r.Context())
 
@@ -70,6 +108,8 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	var result User
 
 	err := mongodb.Profile.FindOne(context.TODO(), filter).Decode(&result)
+	result.Password = ""
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusGone)
 	}

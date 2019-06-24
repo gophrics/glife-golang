@@ -53,6 +53,11 @@ func Routes() *chi.Mux {
 	return router
 }
 
+/*
+METHOD: POST
+Body: TripInfo
+		TripId
+*/
 func GetTrip(w http.ResponseWriter, r *http.Request) {
 	_, claims, err2 := jwtauth.FromContext(r.Context())
 

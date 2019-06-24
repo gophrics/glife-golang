@@ -11,6 +11,7 @@ import (
 
 	"../../common"
 	"../../common/mongodb"
+	"../../common/redis"
 	"github.com/go-chi/render"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -66,13 +67,13 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	result.ProfileId = GenerateProfileId()
 	result.Username = _GenerateUsername()
 
-	insertResult, err := mongodb.Profile.InsertOne(context.TODO(), result)
+	_, err = mongodb.Profile.InsertOne(context.TODO(), result)
 
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}
 
-	fmt.Println("Inserted document from google auth: ", insertResult)
+	redis.Instance.Set(result.Username, true, 999999999999)
 
 	claims := jwt.MapClaims{
 		"profileid": result.ProfileId,
@@ -94,24 +95,33 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	var req User
 
 	json.Unmarshal(b, &req)
+	if req.Email == "" || req.Phone == "" || req.Password == "" {
+		http.Error(w, fmt.Sprintf("Need email, phone and password for registration. Recieved %s", req), http.StatusInternalServerError)
+		return
+	}
+
 	req.ProfileId = GenerateProfileId()
+	if req.Username == "" {
+		req.Username = _GenerateUsername()
+	}
 
 	// BIG TODO: Hash Password
 	// TODO: Assuming single email, that need not be the case, user can have multiple emails linked to same account
 	// For example, registration with a non google email and trying to register later with a google email
-	insertResult, err := mongodb.Profile.InsertOne(context.TODO(), req)
+	_, err = mongodb.Profile.InsertOne(context.TODO(), req)
 	if err != nil {
 		http.Error(w, "Registration failed, MongoDB unavailable at the moment", 500)
 		return
 	}
-	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
+
+	redis.Instance.Set(req.Username, true, 999999999999)
 
 	claims := jwt.MapClaims{
 		"profileid": req.ProfileId,
