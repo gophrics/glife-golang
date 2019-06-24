@@ -37,8 +37,8 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
 
 	var resp2 GoogleAuthVerification
 	json.Unmarshal(body, &resp2)

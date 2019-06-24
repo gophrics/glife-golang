@@ -93,28 +93,43 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllTrips(w http.ResponseWriter, r *http.Request) {
-	_, claims, err2 := jwtauth.FromContext(r.Context())
+	token, claims, err2 := jwtauth.FromContext(r.Context())
 
 	if err2 != nil {
 		http.Error(w, err2.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var profileId = claims["profileid"]
+	var profileId = fmt.Sprintf("%s", claims["profileid"])
 	var myOwn = true
 	// Check if Profile is there in the parameter
 	ss := fmt.Sprintf("%s", chi.URLParam(r, "username"))
 
 	if ss != "" {
-		resp, err := http.Get(fmt.Sprintf("http://profile:8080/api/v1/profile/getuserwithusername/%s", ss))
 
+		req, err := http.NewRequest("GET", fmt.Sprintf("http://profile:8080/api/v1/profile/getuserwithusername/%s", ss), nil)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		defer resp.Body.Close()
+		fmt.Printf("%s", token)
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Raw))
+		resp, err := (&http.Client{}).Do(req)
+
+		fmt.Printf("%s", resp)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		b, err := ioutil.ReadAll(resp.Body)
+		defer resp.Body.Close()
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		var user common.User
 		json.Unmarshal(b, &user)
@@ -122,6 +137,8 @@ func GetAllTrips(w http.ResponseWriter, r *http.Request) {
 		profileId = user.ProfileId
 		myOwn = false
 	}
+
+	fmt.Printf("\n%s\n", profileId)
 
 	var result []Trip
 
@@ -131,18 +148,23 @@ func GetAllTrips(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	for cur.Next(context.TODO()) {
 		var elem Trip
 		err := cur.Decode(&elem)
+		fmt.Printf("\n%s\n", elem)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		if myOwn || elem.Public {
 			result = append(result, elem)
 		}
 	}
+
+	fmt.Printf("\n%s\n", result)
 
 	render.JSON(w, r, result)
 }

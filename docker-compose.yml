@@ -30,12 +30,16 @@ services:
     image: redis:latest
     ports:
     - "6379:6379"
+    logging:
+      driver: "none"
   mongo:
     image: mongo:latest
     ports:
       - "27017:27017"
     volumes:
       - $HOME/mongod:/data/db
+    logging:
+      driver: "none"
   neo4j:
     image: neo4j:latest
     ports:
@@ -48,3 +52,5 @@ services:
       - $HOME/neo4j/plugins:/plugins
     environment:
       - NEO4J_AUTH=neo4j/abc
+    logging:
+      driver: "none"

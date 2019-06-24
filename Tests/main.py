@@ -8,8 +8,8 @@ def main():
     if success:
         ProfileService.get_me()
         ProfileService.get_user()
-        TravelService.get_all_trips('oynlphjur')
         TravelService.save_trip()
+        TravelService.get_all_trips(Context.username)
 
 if __name__ == "__main__":
     main()

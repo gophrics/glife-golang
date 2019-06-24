@@ -16,6 +16,7 @@ def save_trip():
 
 def get_all_trips(username):
     print("http://localhost:8082/api/v1/travel/getalltrips")
+    print(username)
     url = 'http://localhost:8082/api/v1/travel/getalltrips/' + username
     r = requests.Session()
     r.headers.update({"Authorization": "Bearer " + Context.token})

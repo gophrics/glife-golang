@@ -40,7 +40,7 @@ def register():
     if response.status_code == 200:
         print("Token: " + response.json()['Token'])
         Context.token = response.json()['Token']
-        Context.username = name
+        Context.username = username
         return True
     else:
         print("Response: " + str(response.content))

@@ -25,19 +25,20 @@ def generate_country():
 
 def generate_region():
     region = dict()
-    region['latitude'] = str(random.randint(0, 1000)/100)
-    region['longitude'] = str(random.randint(0, 1000)/100)
+    region['latitude'] = (random.randint(0, 1000)/100)
+    region['longitude'] = (random.randint(0, 1000)/100)
     return region
 
 def generate_step():
     step = dict()
-    step['stepId'] = str(random.randint(0, 100))
+    step['stepId'] = (random.randint(0, 100))
+    print(step['stepId'])
     step['latlong'] = generate_region()
     return step
 
 def generate_trip():
     trip = dict()
-    trip['tripId'] = str(random.randint(0, 100))
+    trip['tripId'] = (random.randint(0, 100))
     trip['steps'] = []
     trip['steps'].append(generate_step())
     trip['steps'].append(generate_step())
