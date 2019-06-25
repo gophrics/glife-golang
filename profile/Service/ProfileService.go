@@ -33,7 +33,7 @@ func Routes() *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Recoverer)
-
+	router.Use(middleware.Logger)
 	// Protected routes
 	router.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
@@ -43,6 +43,7 @@ func Routes() *chi.Mux {
 		r.Get("/api/v1/profile/search/{searchstring}", FindUser)
 		r.Get("/api/v1/profile/getme", GetMe)
 		r.Get("/api/v1/profile/getuserwithusername/{username}", GetUserWithUsername)
+		r.Get("/api/v1/profile/setusername/{username}", SetUsername)
 	})
 
 	// Public routes
@@ -58,12 +59,40 @@ func Routes() *chi.Mux {
 	return router
 }
 
+func SetUsername(w http.ResponseWriter, r *http.Request) {
+	ss := fmt.Sprintf("%s", chi.URLParam(r, "username"))
+
+	_, claims, err2 := jwtauth.FromContext(r.Context())
+
+	if err2 != nil {
+		fmt.Printf("%s", err2.Error())
+		return
+	}
+
+	profileId := claims["profileid"]
+	filter := bson.D{{"profileid", profileId}}
+
+	update := bson.D{{"$set", bson.D{{"username", ss}}}}
+	_, err := mongodb.Social.UpdateOne(context.TODO(), filter, update)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	var result struct {
+		Result string `json:"Result"`
+	}
+
+	result.Result = "Success"
+	render.JSON(w, r, result)
+}
+
 func UsernameExist(w http.ResponseWriter, r *http.Request) {
 	ss := fmt.Sprintf("%s", chi.URLParam(r, "username"))
 	_, err := redis.Instance.Get(ss).Result()
 
 	var response struct {
-		Result bool
+		Result bool `json:"Result"`
 	}
 	response.Result = err != nil
 	render.JSON(w, r, response)

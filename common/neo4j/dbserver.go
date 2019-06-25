@@ -1,7 +1,6 @@
 package neo4jd
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -37,7 +36,6 @@ func init() {
 func healthChecks() {
 	for true {
 		if Instance == nil || Session == nil {
-			fmt.Printf("neo4j unhealthy\n")
 			openDB()
 		}
 		time.Sleep(10 * time.Second)

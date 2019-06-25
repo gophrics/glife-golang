@@ -10,12 +10,14 @@ import (
 	neo4jd "../../common/neo4j"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 )
 
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
+	router.Use(middleware.Logger)
 	router.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
 		r.Use(jwtauth.Verifier(tokenAuth))

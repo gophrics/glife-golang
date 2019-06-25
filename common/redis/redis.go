@@ -1,7 +1,6 @@
 package redis
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -32,7 +31,6 @@ func init() {
 func healthChecks() {
 	for true {
 		if Instance == nil {
-			fmt.Printf("Redis unhealthy\n")
 			openDB()
 		}
 		time.Sleep(10 * time.Second)

@@ -32,6 +32,7 @@ func Routes() *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Recoverer)
+	router.Use(middleware.Logger)
 
 	router.Group(func(r chi.Router) {
 		// Seek, verify and validate JWT tokens
