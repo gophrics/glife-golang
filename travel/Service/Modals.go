@@ -18,13 +18,15 @@ type ImageData struct {
 }
 
 type Step struct {
-	StepId  int         `json:"stepId"`
-	Images  []ImageData `json:"imageData"`
-	LatLong Region      `json:"latlong"`
+	StepId   int         `json:"stepId"`
+	StepName string      `json:"stepName"`
+	Images   []ImageData `json:"imageData"`
+	LatLong  Region      `json:"latlong"`
 }
 
 type Trip struct {
 	TripId    int    `json:"tripId"`
+	TripName  string `json:"tripName"`
 	ProfileId string `json:"profileId"`
 	Steps     []Step `json:"steps"`
 	Public    bool   `json:"public"`

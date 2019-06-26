@@ -116,6 +116,7 @@ func GetUserWithUsername(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusGone)
+		return
 	}
 
 	render.JSON(w, r, result)
@@ -163,10 +164,10 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 	ss = fmt.Sprintf(".*%s.*", ss)
 
 	filter := bson.D{
-		{"$or", bson.A{
-			bson.D{{"name", primitive.Regex{ss, ""}}},
-			bson.D{{"country", ss}},
-			bson.D{{"phone", ss}},
+		{"$or", bson.D{
+			{"name", primitive.Regex{ss, ""}},
+			{"country", ss},
+			{"phone", ss},
 		}}}
 	findOptions := options.Find()
 
@@ -190,5 +191,4 @@ func FindUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, result)
-
 }

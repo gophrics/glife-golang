@@ -32,6 +32,7 @@ def generate_region():
 def generate_step():
     step = dict()
     step['stepId'] = (random.randint(0, 100))
+    step['stepName'] = ''.join(random.choice(string.ascii_lowercase) for i in range(6))
     print(step['stepId'])
     step['latlong'] = generate_region()
     return step
@@ -39,6 +40,7 @@ def generate_step():
 def generate_trip():
     trip = dict()
     trip['tripId'] = (random.randint(0, 100))
+    trip['tripName'] = ''.join(random.choice(string.ascii_lowercase) for i in range(6))
     trip['steps'] = []
     trip['steps'].append(generate_step())
     trip['steps'].append(generate_step())

@@ -15,6 +15,7 @@ import (
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var tokenAuth *jwtauth.JWTAuth
@@ -43,6 +44,7 @@ func Routes() *chi.Mux {
 		r.Post("/api/v1/travel/gettrip", GetTrip)
 		r.Post("/api/v1/travel/savetrip", SaveTrip)
 		r.Post("/api/v1/travel/gettriphash", CheckHashPerTrip)
+		r.Get("/api/v1/travel/search/{searchstring}", Search)
 	})
 
 	router.Group(func(r chi.Router) {
@@ -209,6 +211,37 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 	response := make(map[string]string)
 	response["OperationStatus"] = "Success"
 	render.JSON(w, r, response)
+}
+
+func Search(w http.ResponseWriter, r *http.Request) {
+	ss := fmt.Sprintf("%s", chi.URLParam(r, "searchstring"))
+
+	filter := bson.D{
+		{"$or",
+			bson.A{
+				bson.D{{"tripname", bson.D{{"$regex", primitive.Regex{Pattern: ".*" + ss + ".*", Options: "i"}}}}},
+				bson.D{{"stepname", bson.D{{"$regex", primitive.Regex{Pattern: ".*" + ss + ".*", Options: "i"}}}}},
+			}},
+	}
+
+	var result []Trip
+
+	cur, err := mongodb.Travel.Find(context.TODO(), filter)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	var x Trip
+	for cur.Next(context.TODO()) {
+		err := cur.Decode(&x)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		result = append(result, x)
+	}
+
+	render.JSON(w, r, result)
 }
 
 func CheckHashPerTrip(w http.ResponseWriter, r *http.Request) {
