@@ -18,10 +18,14 @@ type ImageData struct {
 }
 
 type Step struct {
-	StepId   int         `json:"stepId"`
-	StepName string      `json:"stepName"`
-	Images   []ImageData `json:"imageData"`
-	LatLong  Region      `json:"latlong"`
+	StepId         int      `json:"stepId"`
+	StepName       string   `json:"stepName"`
+	Images         []string `json:"imageUris"`
+	MasterImageUri string   `json:"masterImageUri"`
+	MasterMarker   Region   `json:"masterMarker"`
+	Markers        []Region `json:"markers"`
+	MeanLatitude   float64  `json:"meanLatitude"`
+	MeanLongitude  float64  `json:"meanLongitude"`
 }
 
 type Trip struct {

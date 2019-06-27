@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"../../common"
 	"../../common/redis"
 	"github.com/go-chi/render"
 )
@@ -44,7 +45,7 @@ func GetLocationFromCoordinates(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res2, err2 := http.Get(fmt.Sprintf("https://us1.locationiq.com/v1/reverse.php?key=%s&lat=%f&lon=%f&format=json", "daecd8873d0c8e", req.Latitude, req.Longitude))
+	res2, err2 := http.Get(fmt.Sprintf("https://us1.locationiq.com/v1/reverse.php?key=%s&lat=%f&lon=%f&format=json", common.LOCATIONIQ_TOKEN, req.Latitude, req.Longitude))
 	if err2 != nil {
 		panic(err2)
 	}
@@ -93,7 +94,7 @@ func GetCoordinatesFromLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res2, err2 := http.Get(fmt.Sprintf("https://us1.locationiq.com/v1/search.php?key=%s&q=%s&format=json", "daecd8873d0c8e", req.Location))
+	res2, err2 := http.Get(fmt.Sprintf("https://us1.locationiq.com/v1/search.php?key=%s&q=%s&format=json", common.LOCATIONIQ_TOKEN, req.Location))
 	if err2 != nil {
 		panic(err2)
 	}

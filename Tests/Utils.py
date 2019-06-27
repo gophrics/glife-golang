@@ -33,6 +33,7 @@ def generate_step():
     step = dict()
     step['stepId'] = (random.randint(0, 100))
     step['stepName'] = ''.join(random.choice(string.ascii_lowercase) for i in range(6))
+    step['imageData'] = []
     print(step['stepId'])
     step['latlong'] = generate_region()
     return step

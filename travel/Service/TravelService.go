@@ -45,6 +45,7 @@ func Routes() *chi.Mux {
 		r.Post("/api/v1/travel/savetrip", SaveTrip)
 		r.Post("/api/v1/travel/gettriphash", CheckHashPerTrip)
 		r.Get("/api/v1/travel/search/{searchstring}", Search)
+		r.Post("/api/v1/travel/toggletripprivacy", TogglePrivacy)
 	})
 
 	router.Group(func(r chi.Router) {
@@ -54,6 +55,44 @@ func Routes() *chi.Mux {
 	})
 
 	return router
+}
+
+func TogglePrivacy(w http.ResponseWriter, r *http.Request) {
+	_, claims, err2 := jwtauth.FromContext(r.Context())
+	if err2 != nil {
+		fmt.Printf("%s", err2.Error())
+		return
+	}
+	var profileId = claims["profileid"]
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	type RequestModal struct {
+		TripInfo
+		Value bool
+	}
+
+	var request RequestModal
+
+	json.Unmarshal(b, &request)
+
+	filter := bson.D{{"tripid", request.TripInfo.TripId}, {"profileid", profileId}}
+
+	update := bson.D{{"$set", bson.D{{"likedby", request.Value}}}}
+
+	_, err = mongodb.Travel.UpdateOne(context.TODO(), filter, update)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	render.JSON(w, r, nil)
 }
 
 /*
@@ -190,6 +229,7 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("%s", b)
 	var req Trip
 	json.Unmarshal(b, &req)
 	req.ProfileId = profileId
@@ -244,6 +284,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, result)
 }
 
+// @title CheckHashPerTrip
+// @version 1.0
+// @description This take tripid, will compute hash value of a trip and send back response
+// @BasePath /api/v1
+// @Body: { "tripId": ""}
 func CheckHashPerTrip(w http.ResponseWriter, r *http.Request) {
 	_, claims, err := jwtauth.FromContext(r.Context())
 
@@ -276,7 +321,8 @@ func CheckHashPerTrip(w http.ResponseWriter, r *http.Request) {
 		Hash string
 	}
 
-	result.Hash = fmt.Sprintf("%s", Hash(trip))
+	// Fix hash mismatch
+	result.Hash = fmt.Sprintf("%x", Hash(trip))
 
 	render.JSON(w, r, result)
 }

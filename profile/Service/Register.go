@@ -56,7 +56,13 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
 
 	if err == nil {
-		http.Error(w, "Profile already exist", 500)
+		res, err2 := json.Marshal(&common.Error{Message: "Profile already exist"})
+		if err2 != nil {
+			http.Error(w, "{}", http.StatusInternalServerError)
+			return
+		}
+		http.Error(w, fmt.Sprintf("%s", res), http.StatusBadRequest)
+		return
 	}
 
 	var result common.User
