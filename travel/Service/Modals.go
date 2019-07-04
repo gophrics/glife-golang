@@ -18,21 +18,34 @@ type ImageData struct {
 }
 
 type Step struct {
-	StepId        int      `json:"stepId"`
-	StepName      string   `json:"stepName"`
-	Images        []string `json:"_imageBase64"`
-	MasterImage   string   `json:"_masterImageBase64"`
-	MasterMarker  Region   `json:"masterMarker"`
-	Markers       []Region `json:"markers"`
-	MeanLatitude  float64  `json:"meanLatitude"`
-	MeanLongitude float64  `json:"meanLongitude"`
+	StepId            int      `json:"stepId"`
+	StepName          string   `json:"stepName"`
+	Images            []string `json:"_imageBase64"`
+	MasterImage       string   `json:"_masterImageBase64"`
+	MasterMarker      Region   `json:"masterMarker"`
+	Markers           []Region `json:"markers"`
+	MeanLatitude      float64  `json:"meanLatitude"`
+	MeanLongitude     float64  `json:"meanLongitude"`
+	Location          string   `json:"location"`
+	StartTimestamp    int64    `json:"startTimestamp"`
+	EndTimestamp      int64    `json:"endTimestamp"`
+	TimelineData      []string `json:"timelineData"`
+	DistanceTravelled int      `json:"distanceTravelled"`
+	Description       string   `json:"description"`
 }
 
 type Trip struct {
-	TripId      int    `json:"tripId"`
-	TripName    string `json:"tripName"`
-	ProfileId   string `json:"profileId"`
-	Steps       []Step `json:"steps"`
-	Public      bool   `json:"public"`
-	MasterImage string `json:"_masterPicBase64"`
+	TripId       int      `json:"tripId"`
+	TripName     string   `json:"tripName"`
+	ProfileId    string   `json:"profileId"`
+	Steps        []Step   `json:"steps"`
+	Public       bool     `json:"public"`
+	MasterImage  string   `json:"_masterPicBase64"`
+	StartDate    string   `json:"startDate"`
+	EndDate      string   `json:"endDate"`
+	Temperature  string   `json:"temperature"`
+	CountryCode  []string `json:"countryCode"`
+	DaysOfTravel int      `json:"daysOfTravel"`
+	Activities   []string `json:"activities"`
+	Location     Region   `json:"location"`
 }
