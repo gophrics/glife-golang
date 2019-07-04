@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	"../../common"
 	"../../common/mongodb"
 	"github.com/dgrijalva/jwt-go"
@@ -239,14 +241,31 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 		{"profileid", profileId},
 	}
 
-	_, err = mongodb.Travel.UpdateOne(context.TODO(), filter, req)
+	var TripUpdateFilter = bson.D{
+		{"$set", bson.D{
+			{"tripId", req.TripId},
+			{"profileid", profileId},
+			{"tripName", req.TripName},
+			{"steps", req.Steps},
+			{"public", req.Public},
+			{"masterImage", req.MasterImage},
+			{"startDate", req.StartDate},
+			{"endDate", req.EndDate},
+			{"temperature", req.Temperature},
+			{"countryCode", req.CountryCode},
+			{"daysOfTravel", req.DaysOfTravel},
+			{"activities", req.Activities},
+			{"location", req.Location},
+		}},
+	}
+
+	var upsert bool = true
+	options := &options.UpdateOptions{Upsert: &upsert}
+	_, err = mongodb.Travel.UpdateOne(context.TODO(), filter, TripUpdateFilter, options)
 
 	if err != nil {
-		_, err2 := mongodb.Travel.InsertOne(context.TODO(), req)
-		if err2 != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	response := make(map[string]string)
 	response["OperationStatus"] = "Success"

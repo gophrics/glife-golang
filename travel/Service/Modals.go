@@ -34,6 +34,7 @@ type Step struct {
 	Description       string   `json:"description"`
 }
 
+// Don't forget to update TripUpdateFilter in SaveTrip API
 type Trip struct {
 	TripId       int      `json:"tripId"`
 	TripName     string   `json:"tripName"`
