@@ -49,4 +49,5 @@ type Trip struct {
 	DaysOfTravel int      `json:"daysOfTravel"`
 	Activities   []string `json:"activities"`
 	Location     Region   `json:"location"`
+	SyncComplete bool     `json:"syncComplete"`
 }

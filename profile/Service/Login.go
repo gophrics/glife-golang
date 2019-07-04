@@ -102,7 +102,8 @@ func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	err = mongodb.Profile.FindOne(context.TODO(), filter).Decode(&profileInDB)
 
 	if err != nil {
-		http.Error(w, "Profile donot exist", 500)
+		http.Error(w, "Profile donot exist", http.StatusBadRequest)
+		return
 	}
 
 	// BIG TODO: Use JWT Token - this is hackable just by tampering response, and unsecure
@@ -115,6 +116,7 @@ func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	var response common.Token
