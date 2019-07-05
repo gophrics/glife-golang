@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"database/sql"
-	"fmt"
 
 	_ "github.com/go-sql-driver/mysql" //Importing mysql connector for golang
 )
@@ -16,7 +15,6 @@ func openDB() *sql.DB {
 	password := ""
 	dbname := "glife"
 	Instance, _ = sql.Open(url, username+":"+password+"@/"+dbname)
-	fmt.Printf("DB OPened\n")
 	return Instance
 }
 

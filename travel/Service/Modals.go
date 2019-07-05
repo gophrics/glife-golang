@@ -1,7 +1,8 @@
 package travel
 
 type TripInfo struct {
-	TripId int `json:"tripId"`
+	TripId    string `json:"tripId"`
+	ProfileId string `json:"profileId"`
 }
 
 type Region struct {
@@ -36,10 +37,26 @@ type Step struct {
 
 // Don't forget to update TripUpdateFilter in SaveTrip API
 type Trip struct {
-	TripId       int      `json:"tripId"`
+	TripId       string   `json:"tripId"`
 	TripName     string   `json:"tripName"`
 	ProfileId    string   `json:"profileId"`
 	Steps        []Step   `json:"steps"`
+	Public       bool     `json:"public"`
+	MasterImage  string   `json:"_masterPicBase64"`
+	StartDate    string   `json:"startDate"`
+	EndDate      string   `json:"endDate"`
+	Temperature  string   `json:"temperature"`
+	CountryCode  []string `json:"countryCode"`
+	DaysOfTravel int      `json:"daysOfTravel"`
+	Activities   []string `json:"activities"`
+	Location     Region   `json:"location"`
+	SyncComplete bool     `json:"syncComplete"`
+}
+
+type TripMeta struct {
+	TripId       string   `json:"tripId"`
+	TripName     string   `json:"tripName"`
+	ProfileId    string   `json:"profileId"`
 	Public       bool     `json:"public"`
 	MasterImage  string   `json:"_masterPicBase64"`
 	StartDate    string   `json:"startDate"`

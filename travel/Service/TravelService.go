@@ -109,7 +109,7 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("%s", err2.Error())
 		return
 	}
-	var profileId = claims["profileid"]
+	var profileId = fmt.Sprintf("%s", claims["profileid"])
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -121,6 +121,9 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 	var tripData TripInfo
 	json.Unmarshal(b, &tripData)
 
+	if tripData.ProfileId != "" {
+		profileId = tripData.ProfileId
+	}
 	var result Trip
 
 	fmt.Printf("%s %s", tripData.TripId, profileId)
@@ -223,6 +226,7 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 
 	var profileId string = fmt.Sprintf("%s", claims["profileid"])
 
+	fmt.Printf("%s\n", profileId)
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -231,7 +235,6 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("%s", b)
 	var req Trip
 	json.Unmarshal(b, &req)
 	req.ProfileId = profileId
@@ -243,17 +246,17 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 
 	var TripUpdateFilter = bson.D{
 		{"$set", bson.D{
-			{"tripId", req.TripId},
+			{"tripid", req.TripId},
 			{"profileid", profileId},
-			{"tripName", req.TripName},
+			{"tripname", req.TripName},
 			{"steps", req.Steps},
 			{"public", req.Public},
-			{"masterImage", req.MasterImage},
-			{"startDate", req.StartDate},
-			{"endDate", req.EndDate},
+			{"masterimage", req.MasterImage},
+			{"startdate", req.StartDate},
+			{"enddate", req.EndDate},
 			{"temperature", req.Temperature},
-			{"countryCode", req.CountryCode},
-			{"daysOfTravel", req.DaysOfTravel},
+			{"countrycode", req.CountryCode},
+			{"daysoftravel", req.DaysOfTravel},
 			{"activities", req.Activities},
 			{"location", req.Location},
 		}},
@@ -283,7 +286,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}},
 	}
 
-	var result []Trip
+	var result []TripMeta
 
 	cur, err := mongodb.Travel.Find(context.TODO(), filter)
 
@@ -291,12 +294,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	var x Trip
+	var x TripMeta
 	for cur.Next(context.TODO()) {
 		err := cur.Decode(&x)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
+
 		result = append(result, x)
 	}
 

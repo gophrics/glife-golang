@@ -7,12 +7,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
 
 	"../../common"
 	"../../common/mongodb"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -49,7 +47,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	claim := jwt.MapClaims{"profileid": profileInDB.ProfileId}
-	jwtauth.SetExpiryIn(claim, (1 * time.Minute))
 
 	_, token, err := tokenAuth.Encode(claim)
 
@@ -58,8 +55,9 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("%s", token)
-
-	render.JSON(w, r, token)
+	var response common.Token
+	response.Token = token
+	render.JSON(w, r, response)
 }
 
 func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +107,7 @@ func LoginUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	// BIG TODO: Use JWT Token - this is hackable just by tampering response, and unsecure
 
 	claims := jwt.MapClaims{
-		"email": resp2.Email,
+		"profileid": profileInDB.ProfileId,
 	}
 
 	_, token, err := tokenAuth.Encode(claims)
