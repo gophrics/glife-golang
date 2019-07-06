@@ -235,10 +235,12 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("\n\n%s\n", b)
 	var req Trip
 	json.Unmarshal(b, &req)
 	req.ProfileId = profileId
 
+	fmt.Printf("\n\n\n%s\n\n", req.MasterPicBase64)
 	filter := bson.D{
 		{"tripId", req.TripId},
 		{"profileid", profileId},
@@ -251,7 +253,7 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 			{"tripname", req.TripName},
 			{"steps", req.Steps},
 			{"public", req.Public},
-			{"masterimage", req.MasterImage},
+			{"masterPicBase64", req.MasterPicBase64},
 			{"startdate", req.StartDate},
 			{"enddate", req.EndDate},
 			{"temperature", req.Temperature},
@@ -259,6 +261,7 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 			{"daysoftravel", req.DaysOfTravel},
 			{"activities", req.Activities},
 			{"location", req.Location},
+			{"distanceTravelled", req.DistanceTravelled},
 		}},
 	}
 

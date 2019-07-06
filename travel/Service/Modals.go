@@ -21,15 +21,15 @@ type ImageData struct {
 type Step struct {
 	StepId            int      `json:"stepId"`
 	StepName          string   `json:"stepName"`
-	Images            []string `json:"_imageBase64"`
-	MasterImage       string   `json:"_masterImageBase64"`
+	ImageBase64       []string `json:"imageBase64"`
+	MasterImageBase64 string   `json:"masterImageBase64"`
 	MasterMarker      Region   `json:"masterMarker"`
 	Markers           []Region `json:"markers"`
 	MeanLatitude      float64  `json:"meanLatitude"`
 	MeanLongitude     float64  `json:"meanLongitude"`
 	Location          string   `json:"location"`
-	StartTimestamp    int      `json:"startTimestamp"`
-	EndTimestamp      int      `json:"endTimestamp"`
+	StartTimestamp    string   `json:"startTimestamp"`
+	EndTimestamp      string   `json:"endTimestamp"`
 	TimelineData      []string `json:"timelineData"`
 	DistanceTravelled int      `json:"distanceTravelled"`
 	Description       string   `json:"description"`
@@ -43,7 +43,7 @@ type Trip struct {
 	ProfileId         string   `json:"profileId"`
 	Steps             []Step   `json:"steps"`
 	Public            bool     `json:"public"`
-	MasterImage       string   `json:"_masterPicBase64"`
+	MasterPicBase64   string   `json:"masterPicBase64"`
 	StartDate         string   `json:"startDate"`
 	EndDate           string   `json:"endDate"`
 	Temperature       string   `json:"temperature"`
@@ -56,17 +56,18 @@ type Trip struct {
 }
 
 type TripMeta struct {
-	TripId       string   `json:"tripId"`
-	TripName     string   `json:"tripName"`
-	ProfileId    string   `json:"profileId"`
-	Public       bool     `json:"public"`
-	MasterImage  string   `json:"_masterPicBase64"`
-	StartDate    string   `json:"startDate"`
-	EndDate      string   `json:"endDate"`
-	Temperature  string   `json:"temperature"`
-	CountryCode  []string `json:"countryCode"`
-	DaysOfTravel int      `json:"daysOfTravel"`
-	Activities   []string `json:"activities"`
-	Location     Region   `json:"location"`
-	SyncComplete bool     `json:"syncComplete"`
+	TripId            string   `json:"tripId"`
+	TripName          string   `json:"tripName"`
+	ProfileId         string   `json:"profileId"`
+	Public            bool     `json:"public"`
+	MasterPicBase64   string   `json:"masterPicBase64"`
+	StartDate         string   `json:"startDate"`
+	EndDate           string   `json:"endDate"`
+	Temperature       string   `json:"temperature"`
+	CountryCode       []string `json:"countryCode"`
+	DaysOfTravel      int      `json:"daysOfTravel"`
+	DistanceTravelled int      `json:"distanceTravelled"`
+	Activities        []string `json:"activities"`
+	Location          Region   `json:"location"`
+	SyncComplete      bool     `json:"syncComplete"`
 }
