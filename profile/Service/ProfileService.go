@@ -42,6 +42,7 @@ func Routes() *chi.Mux {
 
 		r.Get("/api/v1/profile/search/{searchstring}", FindUser)
 		r.Get("/api/v1/profile/getme", GetMe)
+		r.Get("/api/v1/profile/get_profileid", GetProfileId)
 		r.Get("/api/v1/profile/getuserwithusername/{username}", GetUserWithUsername)
 		r.Get("/api/v1/profile/setusername/{username}", SetUsername)
 	})
@@ -57,6 +58,25 @@ func Routes() *chi.Mux {
 	})
 
 	return router
+}
+
+func GetProfileId(w http.ResponseWriter, r *http.Request) {
+	_, claims, err2 := jwtauth.FromContext(r.Context())
+
+	if err2 != nil {
+		fmt.Printf("%s", err2.Error())
+		http.Error(w, err2.Error(), http.StatusBadRequest)
+		return
+	}
+
+	profileId := fmt.Sprintf("%s", claims["profileid"])
+
+	var response struct {
+		ProfileId string `json:"profileId"`
+	}
+	response.ProfileId = profileId
+
+	render.JSON(w, r, response)
 }
 
 func SetUsername(w http.ResponseWriter, r *http.Request) {

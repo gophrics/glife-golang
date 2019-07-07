@@ -243,6 +243,7 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 		{"profileid", profileId},
 	}
 
+	// All small caps, always. If you have big caps here as key, you'll have trouble reading it back to golang struct for god knows what reason
 	var TripUpdateFilter = bson.D{
 		{"$set", bson.D{
 			{"tripid", req.TripId},
@@ -250,7 +251,7 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 			{"tripname", req.TripName},
 			{"steps", req.Steps},
 			{"public", req.Public},
-			{"masterPicBase64", req.MasterPicBase64},
+			{"masterpicbase64", req.MasterPicBase64},
 			{"startdate", req.StartDate},
 			{"enddate", req.EndDate},
 			{"temperature", req.Temperature},
@@ -258,7 +259,7 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 			{"daysoftravel", req.DaysOfTravel},
 			{"activities", req.Activities},
 			{"location", req.Location},
-			{"distanceTravelled", req.DistanceTravelled},
+			{"distancetravelled", req.DistanceTravelled},
 		}},
 	}
 

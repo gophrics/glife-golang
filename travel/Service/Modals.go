@@ -28,8 +28,8 @@ type Step struct {
 	MeanLatitude      float64  `json:"meanLatitude"`
 	MeanLongitude     float64  `json:"meanLongitude"`
 	Location          string   `json:"location"`
-	StartTimestamp    string   `json:"startTimestamp"`
-	EndTimestamp      string   `json:"endTimestamp"`
+	StartTimestamp    float64  `json:"startTimestamp"`
+	EndTimestamp      float64  `json:"endTimestamp"`
 	TimelineData      []string `json:"timelineData"`
 	DistanceTravelled int      `json:"distanceTravelled"`
 	Description       string   `json:"description"`
