@@ -234,13 +234,10 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	fmt.Printf("\n\n%s\n", b)
 	var req Trip
 	json.Unmarshal(b, &req)
 	req.ProfileId = profileId
 
-	fmt.Printf("\n\n\n%s\n\n", req.MasterPicBase64)
 	filter := bson.D{
 		{"tripId", req.TripId},
 		{"profileid", profileId},
@@ -305,6 +302,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		fmt.Printf("\n\nResponse\n\n")
+		fmt.Printf("%s", x)
 		result = append(result, x)
 	}
 
