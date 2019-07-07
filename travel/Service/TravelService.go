@@ -62,7 +62,7 @@ func Routes() *chi.Mux {
 func TogglePrivacy(w http.ResponseWriter, r *http.Request) {
 	_, claims, err2 := jwtauth.FromContext(r.Context())
 	if err2 != nil {
-		fmt.Printf("%s", err2.Error())
+		http.Error(w, err2.Error(), http.StatusBadRequest)
 		return
 	}
 	var profileId = claims["profileid"]
@@ -106,7 +106,7 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 	_, claims, err2 := jwtauth.FromContext(r.Context())
 
 	if err2 != nil {
-		fmt.Printf("%s", err2.Error())
+		http.Error(w, err2.Error(), http.StatusBadRequest)
 		return
 	}
 	var profileId = fmt.Sprintf("%s", claims["profileid"])
@@ -126,7 +126,6 @@ func GetTrip(w http.ResponseWriter, r *http.Request) {
 	}
 	var result Trip
 
-	fmt.Printf("%s %s", tripData.TripId, profileId)
 	filter := bson.D{{"tripid", tripData.TripId}, {"profileid", profileId}}
 
 	err = mongodb.Travel.FindOne(context.TODO(), filter).Decode(&result)
@@ -160,11 +159,9 @@ func GetAllTrips(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Printf("%s", token)
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Raw))
 		resp, err := (&http.Client{}).Do(req)
 
-		fmt.Printf("%s", resp)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -185,8 +182,6 @@ func GetAllTrips(w http.ResponseWriter, r *http.Request) {
 		myOwn = false
 	}
 
-	fmt.Printf("\n%s\n", profileId)
-
 	var result []Trip
 
 	filter := bson.D{{"profileid", profileId}}
@@ -201,7 +196,6 @@ func GetAllTrips(w http.ResponseWriter, r *http.Request) {
 	for cur.Next(context.TODO()) {
 		var elem Trip
 		err := cur.Decode(&elem)
-		fmt.Printf("\n%s\n", elem)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -210,8 +204,6 @@ func GetAllTrips(w http.ResponseWriter, r *http.Request) {
 			result = append(result, elem)
 		}
 	}
-
-	fmt.Printf("\n%s\n", result)
 
 	render.JSON(w, r, result)
 }
@@ -226,7 +218,6 @@ func SaveTrip(w http.ResponseWriter, r *http.Request) {
 
 	var profileId string = fmt.Sprintf("%s", claims["profileid"])
 
-	fmt.Printf("%s\n", profileId)
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -302,9 +293,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		fmt.Printf("\n\nResponse\n\n")
-		fmt.Printf("%s", x)
 		result = append(result, x)
 	}
 
