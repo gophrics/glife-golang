@@ -30,12 +30,21 @@ services:
     image: redis:latest
     ports:
     - "6379:6379"
+    command: redis-server --requirepass iPhoneMyPh0ne!!
     logging:
       driver: "none"
   mongo:
     image: mongo:latest
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=issacnitinmongod
+      - MONGO_INITDB_ROOT_PASSWORD=iPhoneMyPh0ne!!
+      - MONGO_ROOT_USER=issacnitinmongod
+      - MONGO_ROOT_PASS=iPhoneMyPh0ne!!
+      - APP_MONGO_USER=issacnitinmongod
+      - APP_MONGO_PASS=iPhoneMyPh0ne!!
+      - APP_MONGO_DB=glimpse
     volumes:
       - $HOME/mongod:/data/db
     logging:

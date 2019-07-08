@@ -18,8 +18,8 @@ type GeoRadiusQuery = redis.GeoRadiusQuery
 func openDB() {
 	Instance = redis.NewClient(&redis.Options{
 		Addr:     "redis:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Password: "iPhoneMyPh0ne!!", // no password set
+		DB:       0,                 // use default DB
 	})
 }
 

@@ -18,7 +18,7 @@ var Social *mongo.Collection
 
 func openDB() {
 	fmt.Printf("openDB called")
-	Instance, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongo:27017"))
+	Instance, err := mongo.NewClient(options.Client().ApplyURI("mongodb://issacnitinmongod:IPhoneMyPhone!!@mongo:27017"))
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 	}
