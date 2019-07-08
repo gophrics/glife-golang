@@ -18,7 +18,12 @@ var Social *mongo.Collection
 
 func openDB() {
 	fmt.Printf("openDB called")
-	Instance, err := mongo.NewClient(options.Client().ApplyURI("mongodb://issacnitinmongod:IPhoneMyPhone!!@mongo:27017"))
+	Instance, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongo:27017").SetAuth(options.Credential{
+		AuthMechanism: "SCRAM",
+		AuthSource:    "admin",
+		Username:      "issacnitinmongod",
+		Password:      "iPhoneMyPh0ne!!",
+	}))
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 	}
