@@ -5,7 +5,7 @@ const GOOGLE_APP_ID = "249369235819-11cfia1ht584n1kmk6gh6kbba8ab429u.apps.google
 const LOCATIONIQ_TOKEN = "225053fec17f73"
 
 type Token struct {
-	Token string
+	Token string `json:"Token"`
 }
 
 type User struct {

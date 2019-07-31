@@ -85,15 +85,19 @@ func GetCoordinatesFromLocation(w http.ResponseWriter, r *http.Request) {
 
 	json.Unmarshal(b, &req)
 
-	res, err := redis.Instance.Get(req.Location).Result()
+	/*
+		No caching for forward geocoding
+		res, err := redis.Instance.Get(req.Location).Result()
 
-	if err == nil {
-		fmt.Printf("Serving from location cache\n")
-		json.Unmarshal([]byte(res), &resultJSON)
-		render.JSON(w, r, resultJSON)
-		return
-	}
+		if err == nil {
+			fmt.Printf("Serving from location cache\n")
+			json.Unmarshal([]byte(res), &resultJSON)
+			render.JSON(w, r, resultJSON)
+			return
+		}
+	*/
 
+	fmt.Printf("\nSearchlocation api is called\n")
 	res2, err2 := http.Get(fmt.Sprintf("https://us1.locationiq.com/v1/search.php?key=%s&q=%s&format=json", common.LOCATIONIQ_TOKEN, req.Location))
 	if err2 != nil {
 		panic(err2)
