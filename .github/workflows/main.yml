@@ -12,7 +12,6 @@ jobs:
     - name: Run a one-line script
       shell: bash
       run: |
-        sudo apt-get install sshpass
         sshpass -p C0mputer!! ssh root@159.65.153.196
         cd /root/glife-golang
         git pull origin master
