@@ -1,12 +1,7 @@
-{
-    "register": [
+[
         {
             "email": "someemail@something.com",
             "phone": "98324",
             "password": "somepassword"
         }
-    ],
-    "login": [
-
-    ]
-}
+]

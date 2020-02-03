@@ -28,7 +28,7 @@ func init() {
 }
 
 func ReadData() {
-	file, _ := os.Open("data.json")
+	file, _ := os.Open("register_test_data.json")
 	bytes, _ := ioutil.ReadAll(file)
 	json.Unmarshal([]byte(bytes), &testData)
 }
@@ -39,7 +39,7 @@ func ClearDb() {
 
 func Test_RegisterUser(t *testing.T) {
 	var req []common.User
-	test_utils.MapDecode(testData["register"], &req)
+	test_utils.MapDecode(testData, &req)
 
 	jsonData, _ := json.Marshal(req[0])
 	request := httptest.NewRequest("POST", "/api/v1/profile/register", strings.NewReader(string(jsonData)))
