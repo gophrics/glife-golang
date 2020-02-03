@@ -1,9 +1,7 @@
 package travel
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"../../common"
@@ -12,31 +10,20 @@ import (
 )
 
 func GetLocationFromCoordinates(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
+	
 	var req struct {
 		Latitude  float64 `json:"latitude"`
 		Longitude float64 `json:"longitude"`
 	}
 
-	json.Unmarshal(b, &req)
+	req, err := getBodyFromHttpRequest(r, req);
 
 	// Truncing down to two digits
 	var latlon = fmt.Sprintf("%.2f%.2f", req.Latitude, req.Longitude)
 
 	res, err := redis.Instance.Get(latlon).Result()
 
-	var resultJSON struct {
-		DisplayName string                 `json:"display_name"`
-		Address     map[string]interface{} `json:"address"`
-		Error       string                 `json:"error"`
-	}
+	
 
 	if err == nil {
 		fmt.Printf("Serving from location cache\n")
@@ -45,16 +32,12 @@ func GetLocationFromCoordinates(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res2, err2 := http.Get(fmt.Sprintf("https://us1.locationiq.com/v1/reverse.php?key=%s&lat=%f&lon=%f&format=json", common.LOCATIONIQ_TOKEN, req.Latitude, req.Longitude))
-	if err2 != nil {
-		panic(err2)
+	result, err = ReverseLookup(req)
+	if err != nil {
+		panic(err)
 	}
 
-	defer res2.Body.Close()
-
-	body, err := ioutil.ReadAll(res2.Body)
-	json.Unmarshal([]byte(body), &resultJSON)
-	fmt.Printf("%s", resultJSON)
+	fmt.Printf("%s", result)
 
 	fmt.Printf("Serving from locationiq server\n")
 
@@ -65,58 +48,89 @@ func GetLocationFromCoordinates(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCoordinatesFromLocation(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
+	var req struct {
+		Location string `json:"location"`
+	}
 
+	req, err := getBodyFromHttpRequest(r, req);
+	
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	var req struct {
-		Location string `json:"location"`
-	}
-
-	var resultJSON []struct {
-		Latitude    string `json:"lat"`
-		Longitude   string `json:"lon"`
-		DisplayName string `json:"display_name"`
-	}
-
-	json.Unmarshal(b, &req)
-
-	/*
-		No caching for forward geocoding
-		res, err := redis.Instance.Get(req.Location).Result()
-
-		if err == nil {
-			fmt.Printf("Serving from location cache\n")
-			json.Unmarshal([]byte(res), &resultJSON)
-			render.JSON(w, r, resultJSON)
-			return
-		}
-	*/
-
 	fmt.Printf("\nSearchlocation api is called\n")
-	res2, err2 := http.Get(fmt.Sprintf("https://us1.locationiq.com/v1/search.php?key=%s&q=%s&format=json", common.LOCATIONIQ_TOKEN, req.Location))
-	if err2 != nil {
-		panic(err2)
+	result, err := ForwardLookup(req)
+	if err != nil {
+		panic(err)
 	}
-
-	defer res2.Body.Close()
-
-	body, err := ioutil.ReadAll(res2.Body)
-
-	json.Unmarshal([]byte(body), &resultJSON)
 
 	fmt.Printf("Serving from locationiq server\n")
 
 	var slice [][]byte
-	for _, element := range resultJSON {
+	for _, element := range result {
 		res, _ := json.Marshal(element)
 		slice = append(slice, res)
 	}
 
 	redis.Instance.Set(req.Location, fmt.Sprintf("%s", body), 99999999999)
 	render.JSON(w, r, resultJSON)
+}
+
+
+
+func ReverseLookup(req interface{}) {
+	var result struct {
+		DisplayName string                 `json:"display_name"`
+		Address     map[string]interface{} `json:"address"`
+		Error       string                 `json:"error"`
+	}
+
+	baseurl := "https://us1.locationiq.com/v1/reverse.php?key=%s&lat=%f&lon=%f&format=json"
+	formattedurl := fmt.Sprintf(baseurl, common.LOCATIONIQ_TOKEN, req.Latitude, req.Longitude);
+	res, err := http.Get(formattedurl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	json.Unmarshal([]byte(body), &result)
+	
+	return result, nil
+}
+
+func ForwardLookup(req interface{}) {
+	var result []struct {
+		Latitude    string `json:"lat"`
+		Longitude   string `json:"lon"`
+		DisplayName string `json:"display_name"`
+	}
+
+	baseurl := "https://us1.locationiq.com/v1/search.php?key=%s&q=%s&format=json"
+	formattedurl := fmt.Sprintf(baseurl, common.LOCATIONIQ_TOKEN, req.Location);
+	res, err := http.Get(formattedurl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	json.Unmarshal([]byte(body), &result)
+	
+	return result, nil
 }
