@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 
@@ -14,9 +15,7 @@ import (
 	profile "../../Service"
 )
 
-var testData map[string]interface{}
-
-// mongo --eval 'db.createUser({user: "testuser", pwd:"testpwd", roles:[{role:"userAdminAnyDatabase", db: "admin"}]})' admin
+var testData []map[string]interface{}
 
 func init() {
 	mongodb.Addr = "mongodb://localhost:27017"
@@ -25,6 +24,8 @@ func init() {
 
 	ClearDb()
 	ReadData()
+
+	exec.Command("/bin/sh", "initialize_test.sh")
 }
 
 func ReadData() {
