@@ -1,10 +1,12 @@
 {
     "register": [
         {
-            "profileId": "123124"
+            "email": "someemail@something.com",
+            "phone": "98324",
+            "password": "somepassword"
         }
     ],
     "login": [
-        
+
     ]
 }

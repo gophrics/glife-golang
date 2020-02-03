@@ -16,12 +16,21 @@ var Profile *mongo.Collection
 var Travel *mongo.Collection
 var Social *mongo.Collection
 
+var Addr = "mongodb://mongo:27017"
+var Username = "issacnitinmongod"
+var Password = "iPhoneMyPh0ne!!"
+
+func init() {
+	openDB()
+	go healthChecks()
+}
+
 func openDB() {
 	fmt.Printf("openDB called")
-	Instance, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongo:27017").SetAuth(options.Credential{
+	Instance, err := mongo.NewClient(options.Client().ApplyURI(Addr).SetAuth(options.Credential{
 		AuthSource: "admin",
-		Username:   "issacnitinmongod",
-		Password:   "iPhoneMyPh0ne!!",
+		Username:   Username,
+		Password:   Password,
 	}))
 	if err != nil {
 		fmt.Printf("%s", err.Error())
@@ -34,11 +43,6 @@ func openDB() {
 	Profile = Instance.Database("glimpse").Collection("profile")
 	Travel = Instance.Database("glimpse").Collection("travel")
 	Social = Instance.Database("glimpse").Collection("social")
-}
-
-func init() {
-	openDB()
-	go healthChecks()
 }
 
 func healthChecks() {

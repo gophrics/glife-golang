@@ -1,21 +1,31 @@
 package profile_test
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	common "../../../common"
+	mongodb "../../../common/mongodb"
+	test_utils "../../../common/test"
 	profile "../../Service"
-	"github.com/mitchellh/mapstructure"
-	"gotest.tools/assert"
 )
 
 var testData map[string]interface{}
+
+// mongo --eval 'db.createUser({user: "testuser", pwd:"testpwd", roles:[{role:"userAdminAnyDatabase", db: "admin"}]})' admin
+
+func init() {
+	mongodb.Addr = "mongodb://localhost:27017"
+	mongodb.Username = "testuser"
+	mongodb.Password = "testpwd"
+
+	ClearDb()
+	ReadData()
+}
 
 func ReadData() {
 	file, _ := os.Open("data.json")
@@ -23,19 +33,24 @@ func ReadData() {
 	json.Unmarshal([]byte(bytes), &testData)
 }
 
+func ClearDb() {
+
+}
+
 func Test_RegisterUser(t *testing.T) {
-
-	ReadData()
-
 	var req []common.User
-	mapstructure.Decode(testData["register"], &req)
+	test_utils.MapDecode(testData["register"], &req)
 
-	request := httptest.NewRequest("POST", "/api/v1/profile/register", bytes.NewReader([]byte(fmt.Sprintf("%v", req[0]))))
+	jsonData, _ := json.Marshal(req[0])
+	request := httptest.NewRequest("POST", "/api/v1/profile/register", strings.NewReader(string(jsonData)))
 	responseWriter := httptest.NewRecorder()
 	profile.RegisterUser(responseWriter, request)
 	r := responseWriter.Result()
 	body, err := ioutil.ReadAll(r.Body)
 
-	assert.Assert(t, err != nil)
-	assert.Equal(t, body, "abc")
+	test_utils.Assert(t, err == nil)
+
+	var token common.Token
+	json.Unmarshal([]byte(body), &token)
+	test_utils.Assert(t, token.Token != "")
 }
