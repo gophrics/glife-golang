@@ -16,6 +16,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+var oAuthHelper Google
+
 func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -30,7 +32,7 @@ func RegisterUserWithGoogle(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(b, &req)
 
 	// Verify google auth token is valid for our client
-	resp, err := http.Get(fmt.Sprintf("https://oauth2.googleapis.com/tokeninfo?id_token=%s", req.Token))
+	resp, err := oAuthHelper.GetDetails(req.Token)
 
 	if err != nil {
 		http.Error(w, err.Error(), 500)

@@ -55,3 +55,21 @@ func Test_RegisterUser(t *testing.T) {
 	json.Unmarshal([]byte(body), &token)
 	test_utils.Assert(t, token.Token != "")
 }
+
+func Test_RegisterUserWithGoogle(t *testing.T) {
+	var req []common.User
+	test_utils.MapDecode(testData, &req)
+
+	jsonData, _ := json.Marshal(req[0])
+	request := httptest.NewRequest("POST", "/api/v1/profile/registerWithGoogle", strings.NewReader(string(jsonData)))
+	responseWriter := httptest.NewRecorder()
+	profile.RegisterUser(responseWriter, request)
+	r := responseWriter.Result()
+	body, err := ioutil.ReadAll(r.Body)
+
+	test_utils.Assert(t, err == nil)
+
+	var token common.Token
+	json.Unmarshal([]byte(body), &token)
+	test_utils.Assert(t, token.Token != "")
+}
